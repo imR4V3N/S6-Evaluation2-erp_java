@@ -1,5 +1,7 @@
 <%@ page import="java.util.List" %>
-<%@ page import="mg.erp.entities.Fournisseur" %><%--
+<%@ page import="mg.erp.entities.Fournisseur" %>
+<%@ page import="mg.erp.entities.DemandeDevis" %>
+<%@ page import="mg.erp.entities.DemandeDevis" %><%--
   Created by IntelliJ IDEA.
   User: raven
   Date: 01/05/2025
@@ -9,7 +11,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String contextPath = request.getContextPath();
-    List<Fournisseur> fournisseurs = (List<Fournisseur>) request.getAttribute("fournisseurs");
+    List<DemandeDevis> demandeDevis = (List<DemandeDevis>) request.getAttribute("demandeDevis");
+    String fournisseur = (String) request.getAttribute("fournisseur");
 %>
 <html>
 <head>
@@ -39,35 +42,27 @@
                 <div class="section-body">
                     <div class="row">
                         <div class="col-12">
-                            <% if (fournisseurs.size() > 0 && fournisseurs!= null) {%>
+                            <% if (demandeDevis.size() > 0 && demandeDevis!= null) {%>
                             <div class="card">
                                 <div class="card-header">
-                                    <h4>Fournisseurs</h4>
+                                    <h4>Demande de devis du fournisseurs <%=fournisseur%></h4>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover" id="tableExport" style="width:100%;">
                                             <thead>
                                             <tr>
-                                                <th>ID</th>
                                                 <th>Nom</th>
-                                                <th>Country</th>
-                                                <th>Type</th>
-                                                <th>Group</th>
-                                                <th>Devis</th>
-                                                <th>Bon de comamnde</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <% for (Fournisseur fournisseur : fournisseurs) {%>
+                                            <% for (DemandeDevis demandeDevis1 : demandeDevis) {%>
                                                 <tr>
-                                                    <td><%=fournisseur.getName()%></td>
-                                                    <td><%=fournisseur.getSupplier_name()%></td>
-                                                    <td><%=fournisseur.getCountry()%></td>
-                                                    <td><%=fournisseur.getSupplier_type()%></td>
-                                                    <td><%=fournisseur.getSupplier_group()%></td>
-                                                    <td><a href="<%=contextPath%>/fournisseur/demandeDevis?name=<%=fournisseur.getName()%>" class="btn btn-info">Devis</a></td>
-                                                    <td><a href="<%=contextPath%>/fournisseur/bon-commandes?name=<%=fournisseur.getName()%>" class="btn btn-info">Commande</a></td>
+                                                    <td><%=demandeDevis1.getName()%></td>
+                                                    <td><%=demandeDevis1.getTransaction_date()%></td>
+                                                    <td><%=demandeDevis1.getStatus()%></td>
                                                 </tr>
                                             <% } %>
                                             </tbody>
@@ -79,8 +74,8 @@
                                 <div class="alert alert-light alert-has-icon">
                                     <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
                                     <div class="alert-body">
-                                        <div class="alert-title">Aucun fournisseur</div>
-                                        <a href="http://erpnext.localhost:8000/app/customer" class="btn btn-link">Creer un nouveau fournisseur</a>
+                                        <div class="alert-title">Aucun demande de devis</div>
+                                        <a href="http://erpnext.localhost:8000/app/request-for-quotation" class="btn btn-link">Faire une nouvelle demande</a>
                                     </div>
                                 </div>
                             <% } %>
