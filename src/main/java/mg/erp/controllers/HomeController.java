@@ -21,10 +21,16 @@ import java.util.List;
 @Controller
 public class HomeController {
     private final ConfigurableEnvironment configurableEnvironment;
+    private final Auth auth = new Auth();
 
     public HomeController(ConfigurableEnvironment configurableEnvironment) {
         this.configurableEnvironment = configurableEnvironment;
     }
+
+    private String buildLoginUrl() {
+        return new Config().getErpUrl(configurableEnvironment) + "/api/method/login";
+    }
+
 
     @GetMapping("/")
     public String index(HttpServletRequest request) {
@@ -38,45 +44,16 @@ public class HomeController {
                         HttpServletRequest request,
                         HttpSession session) {
 
-        String url = new Config().getErpUrl(configurableEnvironment) +"/api/method/login";
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("usr", username);
-        body.add("pwd", password);
-
-        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(body, headers);
+        String url = buildLoginUrl();
+        HttpEntity<MultiValueMap<String, String>> httpEntity = auth.buildHttpEntity(username, password);
 
         try {
-            // Execute login request
-            ResponseEntity<Auth> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    httpEntity,
-                    Auth.class
-            );
+            ResponseEntity<Auth> response = auth.executeLoginRequest(url, httpEntity);
 
-            // ✅ Récupérer l'objet Auth
             Auth auth = response.getBody();
+            String sid = auth.extractSidFromCookies(response.getHeaders());
 
-            // ✅ Récupérer les headers pour extraire le cookie "sid"
-            List<String> cookies = response.getHeaders().get(HttpHeaders.SET_COOKIE);
-            String sid = null;
-
-            if (cookies != null) {
-                for (String cookie : cookies) {
-                    if (cookie.startsWith("sid=")) {
-                        sid = cookie.split(";")[0].split("=")[1];
-                        break;
-                    }
-                }
-            }
-
-            // ✅ Si login réussi
-            if (auth != null && "Logged In".equals(auth.getMessage())) {
+            if (auth.isLoginSuccessful(auth, sid)) {
                 auth.setSid(sid);
                 session.setAttribute("user", auth);
                 return "redirect:/fournisseur";
@@ -89,6 +66,7 @@ public class HomeController {
         request.setAttribute("error", "Identifiants incorrects");
         return "index";
     }
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
