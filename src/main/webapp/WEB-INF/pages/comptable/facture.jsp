@@ -1,5 +1,5 @@
 <%@ page import="java.util.List" %>
-<%@ page import="mg.erp.entities.Fournisseur" %><%--
+<%@ page import="mg.erp.entities.Facture" %>
   Created by IntelliJ IDEA.
   User: raven
   Date: 01/05/2025
@@ -9,11 +9,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String contextPath = request.getContextPath();
-    List<Fournisseur> fournisseurs = (List<Fournisseur>) request.getAttribute("fournisseurs");
+    List<Facture> factures = (List<Facture>) request.getAttribute("factures");
+    String message = (String) request.getAttribute("message");
 %>
 <html>
 <head>
-    <title>Fournisseur</title>
+    <title>Facture</title>
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/app.min.css">
     <!-- Template CSS -->
     <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/datatables/datatables.min.css">
@@ -39,41 +40,57 @@
                 <div class="section-body">
                     <div class="row">
                         <div class="col-12">
-                            <% if (fournisseurs.size() > 0 && fournisseurs!= null) {%>
+                            <% if (factures.size() > 0 && factures!= null) {%>
                             <div class="card">
                                 <div class="card-header">
-                                    <h4>Fournisseurs</h4>
+                                    <h4>Facture</h4>
                                 </div>
                                 <div class="card-body">
                                     <nav aria-label="breadcrumb">
                                         <ol class="breadcrumb">
-                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-user-friends"></i> Fournisseurs</li>
+                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-clipboard-list"></i> Factures</li>
                                         </ol>
                                     </nav>
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover" id="tableExport" style="width:100%;">
                                             <thead>
                                             <tr>
-                                                <th>ID</th>
                                                 <th>Nom</th>
-                                                <th>Country</th>
-                                                <th>Type</th>
-                                                <th>Group</th>
-                                                <th>Devis</th>
-                                                <th>Bon de comamnde</th>
+                                                <th>Fournisseur</th>
+                                                <th>Date de facture</th>
+                                                <th>Date d'échéance</th>
+                                                <th>Montant dû</th>
+                                                <th>Montant total</th>
+                                                <th>Devise</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <% for (Fournisseur fournisseur : fournisseurs) {%>
-                                                <tr>
-                                                    <td><%=fournisseur.getName()%></td>
-                                                    <td><%=fournisseur.getSupplier_name()%></td>
-                                                    <td><%=fournisseur.getCountry()%></td>
-                                                    <td><%=fournisseur.getSupplier_type()%></td>
-                                                    <td><%=fournisseur.getSupplier_group()%></td>
-                                                    <td><a href="<%=contextPath%>/fournisseur/demandeDevis?name=<%=fournisseur.getName()%>" class="btn btn-info">Devis</a></td>
-                                                    <td><a href="<%=contextPath%>/fournisseur/bon-commandes?name=<%=fournisseur.getName()%>" class="btn btn-info">Commande</a></td>
-                                                </tr>
+                                            <% for (Facture facture : factures) { %>
+                                            <tr>
+                                                <td><%= facture.getName() %></td>
+                                                <td><%= facture.getSupplier() %></td>
+                                                <td><%= facture.getPosting_date() %></td>
+                                                <td><%= facture.getDue_date() %></td>
+                                                <td><%= facture.getOutstanding_amount() %></td>
+                                                <td><%= facture.getGrand_total() %></td>
+                                                <td><%= facture.getCurrency() %></td>
+                                                <% if (!"Paid".equalsIgnoreCase(facture.getStatus())) { %>
+                                                    <td class="text-danger"><%= facture.getStatus() %></td>
+                                                <% } else { %>
+                                                    <td class="text-success"><%= facture.getStatus() %></td>
+                                                <% } %>
+
+                                                <td>
+                                                    <% if (!"Paid".equalsIgnoreCase(facture.getStatus())) { %>
+                                                    <form method="post" action="<%=contextPath%>/comptable/facture/payer">
+                                                        <input type="hidden" name="factureName" value="<%=facture.getName() %>" />
+                                                        <button type="submit" class="btn btn-info btn-sm">Payer</button>
+                                                    </form>
+                                                    <% } %>
+                                                </td>
+                                            </tr>
                                             <% } %>
                                             </tbody>
                                         </table>
@@ -84,8 +101,8 @@
                                 <div class="alert alert-light alert-has-icon">
                                     <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
                                     <div class="alert-body">
-                                        <div class="alert-title">Aucun fournisseur</div>
-                                        <a href="http://erpnext.localhost:8000/app/customer" class="btn btn-link">Creer un nouveau fournisseur</a>
+                                        <div class="alert-title">Aucun facture</div>
+                                        <a href="http://erpnext.localhost:8000/app/purchase-invoice" class="btn btn-link">Faire une nouvelle facture</a>
                                     </div>
                                 </div>
                             <% } %>

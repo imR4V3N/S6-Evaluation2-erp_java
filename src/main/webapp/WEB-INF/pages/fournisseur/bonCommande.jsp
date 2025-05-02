@@ -17,7 +17,7 @@
 %>
 <html>
 <head>
-    <title>Fournisseur</title>
+    <title>Bon de commande</title>
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/app.min.css">
     <!-- Template CSS -->
     <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/datatables/datatables.min.css">
@@ -49,6 +49,12 @@
                                     <h4>Bon de commande du fournisseurs <%=fournisseur%></h4>
                                 </div>
                                 <div class="card-body">
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="<%=contextPath%>/fournisseur"><i class="fas fa-user-friends"></i> Fournisseurs</a></li>
+                                            <li class="breadcrumb-item active" aria-current="page"><i class="far fa-newspaper"></i> Bon de commande</li>
+                                        </ol>
+                                    </nav>
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover" id="tableExport" style="width:100%;">
                                             <thead>
@@ -71,7 +77,7 @@
                                                     <td><%=bonCommande.getSchedule_date()%></td>
                                                     <td><%=bonCommande.getStatus()%></td>
                                                     <td><%=bonCommande.getTotal_qty()%></td>
-                                                    <td><%=bonCommande.getGrand_total()%></td>
+                                                    <td><%=bonCommande.getGrand_total()%> $</td>
                                                     <td><%=bonCommande.getCurrency()%></td>
                                                     <td><%=bonCommande.getCompany()%></td>
                                                 </tr>

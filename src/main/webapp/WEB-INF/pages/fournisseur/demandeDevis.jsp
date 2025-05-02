@@ -16,7 +16,7 @@
 %>
 <html>
 <head>
-    <title>Fournisseur</title>
+    <title>Demande de devis</title>
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/app.min.css">
     <!-- Template CSS -->
     <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/datatables/datatables.min.css">
@@ -54,7 +54,9 @@
                                             <tr>
                                                 <th>Nom</th>
                                                 <th>Date</th>
+                                                <th>Total</th>
                                                 <th>Status</th>
+                                                <th>Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -62,7 +64,9 @@
                                                 <tr>
                                                     <td><%=demandeDevis1.getName()%></td>
                                                     <td><%=demandeDevis1.getTransaction_date()%></td>
+                                                    <td><%=demandeDevis1.getTotal()%> $</td>
                                                     <td><%=demandeDevis1.getStatus()%></td>
+                                                    <td><a href="<%=contextPath%>/fournisseur/demandeDevis/<%=demandeDevis1.getName()%>/produits" class="btn btn-info">Details</a></td>
                                                 </tr>
                                             <% } %>
                                             </tbody>

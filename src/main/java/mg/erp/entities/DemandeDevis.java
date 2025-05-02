@@ -17,6 +17,7 @@ public class DemandeDevis {
     private String status;
     private List<Fournisseur> fournisseurs;
     private List<Produit> produits;
+    private double total;
 
     public String getName() {
         return name;
@@ -56,6 +57,14 @@ public class DemandeDevis {
 
     public void setProduits(List<Produit> produits) {
         this.produits = produits;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
     }
 
     private List<JsonNode> fetchDevisList(String baseUrl, HttpEntity<String> entity) throws Exception {
@@ -106,14 +115,21 @@ public class DemandeDevis {
         demandeDevis.setFournisseurs(supplierList);
 
         List<Produit> items = new ArrayList<>();
+        double total = 0.0;
         for (JsonNode item : data.path("items")) {
             Produit produit = new Produit();
             produit.setItem_code(item.path("item_code").asText());
             produit.setUom(item.path("uom").asText());
             produit.setQty(item.path("qty").asDouble());
+
+            double rate = item.path("rate").asDouble(); // ou item.path("price_list_rate")
+            total += produit.getQty() * rate;
+
+            produit.setRate(String.valueOf(rate));
             items.add(produit);
         }
         demandeDevis.setProduits(items);
+        demandeDevis.setTotal(total);
 
         return demandeDevis;
     }
