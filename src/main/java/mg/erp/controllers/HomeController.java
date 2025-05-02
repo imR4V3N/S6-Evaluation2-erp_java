@@ -27,10 +27,10 @@ public class HomeController {
         this.configurableEnvironment = configurableEnvironment;
     }
 
+//    -------------------------------------- LOGIN ----------------------------------------
     private String buildLoginUrl() {
         return new Config().getErpUrl(configurableEnvironment) + "/api/method/login";
     }
-
 
     @GetMapping("/")
     public String index(HttpServletRequest request) {

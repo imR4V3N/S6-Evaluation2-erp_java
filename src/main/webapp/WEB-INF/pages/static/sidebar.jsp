@@ -14,15 +14,13 @@
             <li class="dropdown">
                 <a href="<%=contextPath%>/fournisseur" class="nav-link"><i class="fas fa-user-friends"></i><span>Fournisseurs</span></a>
             </li>
-<%--            <li class="menu-header">UI Elements</li>--%>
-<%--            <li class="dropdown">--%>
-<%--                <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="copy"></i><span>Basic--%>
-<%--                  Components</span></a>--%>
-<%--                <ul class="dropdown-menu">--%>
-<%--                    <li><a class="nav-link" href="<%=contextPath%>">Alert</a></li>--%>
-<%--                    <li><a class="nav-link" href="<%=contextPath%>">Badge</a></li>--%>
-<%--                </ul>--%>
-<%--            </li>--%>
+            <li class="menu-header">Mode comptable</li>
+            <li class="dropdown">
+                <a href="#" class="menu-toggle nav-link has-dropdown"><i class="fas fa-university"></i><span>Comptable</span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="<%=contextPath%>/comptable/factures">Factures</a></li>
+                </ul>
+            </li>
         </ul>
     </aside>
 </div>

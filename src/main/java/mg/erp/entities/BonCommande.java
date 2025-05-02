@@ -1,5 +1,14 @@
 package mg.erp.entities;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class BonCommande {
     private String name;
     private String supplier;
@@ -101,6 +110,38 @@ public class BonCommande {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+
+    public List<BonCommande> fetchAndFilterBonsDeCommande(String fournisseurName, String url, HttpEntity<String> entity) throws Exception {
+        List<BonCommande> result = new ArrayList<>();
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+
+        JsonNode bonList = response.getBody().path("data");
+        for (JsonNode bon : bonList) {
+            if (fournisseurName.equalsIgnoreCase(bon.path("supplier_name").asText())) {
+                result.add(mapJsonToBonCommande(bon));
+            }
+        }
+        return result;
+    }
+
+
+    private BonCommande mapJsonToBonCommande(JsonNode bon) {
+        BonCommande commande = new BonCommande();
+        commande.setName(bon.path("name").asText());
+        commande.setSupplier(bon.path("supplier").asText());
+        commande.setSupplier_name(bon.path("supplier_name").asText());
+        commande.setTransaction_date(bon.path("transaction_date").asText());
+        commande.setSchedule_date(bon.path("schedule_date").asText());
+        commande.setStatus(bon.path("status").asText());
+        commande.setTotal_qty(bon.path("total_qty").asDouble());
+        commande.setGrand_total(bon.path("grand_total").asDouble());
+        commande.setCurrency(bon.path("currency").asText());
+        commande.setIn_words(bon.path("in_words").asText());
+        commande.setCompany(bon.path("company").asText());
+        return commande;
     }
 }
 

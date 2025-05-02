@@ -3,10 +3,7 @@ package mg.erp.controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import mg.erp.entities.Auth;
-import mg.erp.entities.BonCommande;
-import mg.erp.entities.DemandeDevis;
-import mg.erp.entities.Fournisseur;
+import mg.erp.entities.*;
 import mg.erp.utils.Config;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpEntity;
@@ -15,13 +12,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Controller
 @RequestMapping("/fournisseur")
@@ -29,11 +31,13 @@ public class FournisseurController {
     private final ConfigurableEnvironment configurableEnvironment;
     private final Fournisseur fournisseur = new Fournisseur();
     private final DemandeDevis demandeDevis = new DemandeDevis();
+    private final BonCommande bonCommande = new BonCommande();
 
     public FournisseurController(ConfigurableEnvironment configurableEnvironment) {
         this.configurableEnvironment = configurableEnvironment;
     }
 
+//    -------------------------------------------- FOURNISSEUR ----------------------------------------
     private String buildFournisseurUrl() {
         return new Config().getErpUrl(configurableEnvironment) + "/api/resource/Supplier?fields=[\"name\",\"supplier_name\",\"supplier_type\",\"supplier_group\",\"country\"]";
     }
@@ -68,8 +72,11 @@ public class FournisseurController {
         }
     }
 
-    @GetMapping("/devis")
-    public String devis(@RequestParam("name") String name, HttpServletRequest request, HttpSession session) {
+
+//    -------------------------------------------- DEMANDE DEVIS --------------------------------------------------
+
+    @GetMapping("/demandeDevis")
+    public String demandeDevis(@RequestParam("name") String name, HttpServletRequest request, HttpSession session) {
         Auth user = (Auth) session.getAttribute("user");
 
         if (user.getSid() == null) {
@@ -80,20 +87,18 @@ public class FournisseurController {
 
         try {
             List<DemandeDevis> result = demandeDevis.fetchDevisForSupplier(name, user.getSid(), entity, configurableEnvironment);
-            request.setAttribute("devis", result);
+            request.setAttribute("demandeDevis", result);
             request.setAttribute("fournisseur", name);
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Erreur de récupération des devis : " + e.getMessage());
         }
 
-        return "demandeDevis";
+        return "fournisseur/demandeDevis";
     }
 
-
-    @GetMapping("/bon-commandes")
-    public String bonsDeCommande(@RequestParam("name") String name, HttpServletRequest request, HttpSession session) {
-        List<BonCommande> result = new ArrayList<>();
+    @GetMapping("/demandeDevis/{devisName}/produits")
+    public String produitsParDevis(@PathVariable("devisName") String devisName, HttpServletRequest request, HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
         String url = new Config().getErpUrl(configurableEnvironment);
         Auth user = (Auth) session.getAttribute("user");
@@ -101,53 +106,84 @@ public class FournisseurController {
         if (user.getSid() == null) {
             return "redirect:/";
         }
+        // Auth headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + user.getSid());
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            // 1. Récupération de tous les bons de commande
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Cookie", "sid=" + user.getSid());
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            String urlDetail = url + "/api/resource/Request for Quotation/" + devisName;
+            ResponseEntity<JsonNode> detailResponse = restTemplate.exchange(urlDetail, HttpMethod.GET, entity, JsonNode.class);
+            JsonNode data = detailResponse.getBody().path("data");
 
-            // 2. Appel de l'API
-            String apiUrl = url + "/api/resource/Purchase Order" +
-                    "?fields=[\"name\",\"supplier\",\"supplier_name\",\"transaction_date\",\"schedule_date\",\"status\",\"total_qty\",\"grand_total\",\"currency\",\"in_words\",\"company\"]";
+            // 2. Récupérer les fournisseurs (concaténés)
+            String fournisseurs = StreamSupport.stream(data.path("suppliers").spliterator(), false)
+                    .map(supp -> supp.path("supplier_name").asText())
+                    .collect(Collectors.joining(", "));
 
-            ResponseEntity<JsonNode> response = restTemplate.exchange(
-                    apiUrl,
-                    HttpMethod.GET,
-                    entity,
-                    JsonNode.class
-            );
-            JsonNode bonList = response.getBody().path("data");
+            // 3. Remplir la liste des produits
+            List<Produit> produits = new ArrayList<>();
+            for (JsonNode item : data.path("items")) {
+                Produit p = new Produit();
+                p.setName(item.path("name").asText());
+                p.setItem_code(item.path("item_code").asText());
+                p.setItem_name(item.path("item_name").asText());
+                p.setQty(item.path("qty").asDouble());
+                p.setRate(item.path("rate").asText());
+                p.setDescription(item.path("description").asText());
+                p.setUom(item.path("uom").asText());
+                p.setSchedule_date(item.path("schedule_date").asText());
+                p.setDevis_name(devisName);
+                p.setFournisseur(fournisseurs);
 
-            // 2. Filtrage par nom de fournisseur
-            for (JsonNode bon : bonList) {
-                String nomFournisseur = bon.path("supplier_name").asText();
-                if (name.equalsIgnoreCase(nomFournisseur)) {
-                    BonCommande commande = new BonCommande();
-                    commande.setName(bon.path("name").asText());
-                    commande.setSupplier(bon.path("supplier").asText());
-                    commande.setSupplier_name(nomFournisseur);
-                    commande.setTransaction_date(bon.path("transaction_date").asText());
-                    commande.setSchedule_date(bon.path("schedule_date").asText());
-                    commande.setStatus(bon.path("status").asText());
-                    commande.setTotal_qty(bon.path("total_qty").asDouble());
-                    commande.setGrand_total(bon.path("grand_total").asDouble());
-                    commande.setCurrency(bon.path("currency").asText());
-                    commande.setIn_words(bon.path("in_words").asText());
-                    commande.setCompany(bon.path("company").asText());
+                System.out.println("Produit: " + p.getName() + ", Code: " + p.getItem_code() + ", Fournisseur: " + fournisseurs + ", Devis: " + devisName + ", Date: " + p.getSchedule_date() + ", UOM: " + p.getUom() + ", Description: " + p.getDescription() + ", Qty: " + p.getQty() + ", Rate: " + p.getRate() + ", Total: " + (p.getRate() != null ? Double.parseDouble(p.getRate()) * p.getQty() : 0) + ", Grand Total: " + (p.getRate() != null ? Double.parseDouble(p.getRate()) * p.getQty() : 0));
 
-                    result.add(commande);
-                }
+                produits.add(p);
             }
 
-            request.setAttribute("bons", result);
-            request.setAttribute("fournisseur", name);
-            return "fournisseur/bonCommande"; // la vue JSP/HTML
-        } catch (HttpClientErrorException e) {
+            request.setAttribute("produits", produits);
+            request.setAttribute("devis", devisName);
+
+        } catch (Exception e) {
             e.printStackTrace();
-            return "redirect:/fournisseur"; // redirection en cas d'erreur
+            request.setAttribute("error", "Erreur lors de la récupération des produits : " + e.getMessage());
+        }
+
+        return "fournisseur/detailsDevis";
+    }
+
+
+
+//    -------------------------------------------- BON COMMANDE --------------------------------------------------
+
+    private String buildBonCommandeApiUrl() {
+        return new Config().getErpUrl(configurableEnvironment) +
+                "/api/resource/Purchase Order?fields=[\"name\",\"supplier\",\"supplier_name\",\"transaction_date\",\"schedule_date\",\"status\",\"total_qty\",\"grand_total\",\"currency\",\"in_words\",\"company\"]";
+    }
+
+    @GetMapping("/bon-commandes")
+    public String bonsDeCommande(@RequestParam("name") String name, HttpServletRequest request, HttpSession session) {
+        Auth user = (Auth) session.getAttribute("user");
+
+        if (user.getSid() == null) {
+            return "redirect:/";
+        }
+
+        try {
+            String apiUrl = buildBonCommandeApiUrl();
+            HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
+
+            List<BonCommande> bons = bonCommande.fetchAndFilterBonsDeCommande(name, apiUrl, entity);
+            request.setAttribute("bons", bons);
+            request.setAttribute("fournisseur", name);
+            return "fournisseur/bonCommande";
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Erreur lors de la récupération des bons de commande : " + e.getMessage());
+            return "redirect:/fournisseur";
         }
     }
+
+
 
 }
