@@ -137,15 +137,29 @@ public class Facture {
         return message;
     }
 
-    public void modifyPaymentEntry(JsonNode paymentEntry) {
+    public void modifyPaymentEntry(JsonNode paymentEntry, double montantPartiel) {
         ((ObjectNode) paymentEntry).put("name", "new-payment-entry-qxksrrpydn");
         ((ObjectNode) paymentEntry).put("__last_sync_on", "2025-05-02T05:45:45.900Z");
         ((ObjectNode) paymentEntry).put("reference_no", "0706890");
+
+        ((ObjectNode) paymentEntry).put("paid_amount", montantPartiel);
+        ((ObjectNode) paymentEntry).put("paid_amount_after_tax", montantPartiel);
+        ((ObjectNode) paymentEntry).put("base_paid_amount", montantPartiel);
+        ((ObjectNode) paymentEntry).put("base_paid_amount_after_tax", montantPartiel);
+        ((ObjectNode) paymentEntry).put("received_amount", montantPartiel);
+        ((ObjectNode) paymentEntry).put("received_amount_after_tax", montantPartiel);
+        ((ObjectNode) paymentEntry).put("base_received_amount", montantPartiel);
+        ((ObjectNode) paymentEntry).put("base_received_amount_after_tax", montantPartiel);
+        ((ObjectNode) paymentEntry).put("total_allocated_amount", montantPartiel);
+        ((ObjectNode) paymentEntry).put("base_total_allocated_amount", montantPartiel);
+        ((ObjectNode) paymentEntry).put("unallocated_amount", 0.0);
+        ((ObjectNode) paymentEntry).put("difference_amount", 0.0);
 
         for (JsonNode ref : paymentEntry.path("references")) {
             ((ObjectNode) ref).put("__islocal", 1);
             ((ObjectNode) ref).put("parent", "new-payment-entry-qxksrrpydn");
             ((ObjectNode) ref).put("name", "new-payment-entry-reference-ietpmvfluv");
+            ((ObjectNode) ref).put("allocated_amount", montantPartiel);
         }
     }
 
@@ -156,17 +170,18 @@ public class Facture {
         // Sauvegarde
         saveBody.put("action", "Save");
         HttpEntity<String> saveEntity = new HttpEntity<>(saveBody.toString(), headers);
-        restTemplate.exchange(
+        ResponseEntity<JsonNode> response1 = restTemplate.exchange(
                 baseUrl + "/api/method/frappe.desk.form.save.savedocs",
                 HttpMethod.POST,
                 saveEntity,
                 JsonNode.class
         );
 
+
         // Soumission
         saveBody.put("action", "Submit");
         HttpEntity<String> submitEntity = new HttpEntity<>(saveBody.toString(), headers);
-        restTemplate.exchange(
+        ResponseEntity<JsonNode> response2 = restTemplate.exchange(
                 baseUrl + "/api/method/frappe.desk.form.save.savedocs",
                 HttpMethod.POST,
                 submitEntity,

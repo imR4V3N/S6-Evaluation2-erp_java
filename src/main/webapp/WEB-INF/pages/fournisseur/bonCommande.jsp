@@ -67,6 +67,8 @@
                                                 <th>Grand total</th>
                                                 <th>Device</th>
                                                 <th>Company</th>
+                                                <th>Reçu</th>
+                                                <th>Payée</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -80,6 +82,8 @@
                                                     <td><%=bonCommande.getGrand_total()%> $</td>
                                                     <td><%=bonCommande.getCurrency()%></td>
                                                     <td><%=bonCommande.getCompany()%></td>
+                                                    <td><%=bonCommande.getIsReceived() ? "<p class=\"text-success\"><i class=\"fas fa-check\"></i> Oui</p>" : "<p class=\"text-danger\"><i class=\"far fa-times-circle\"></i> Non</p>"%></td>
+                                                    <td><%=bonCommande.getIsPaid() ? "<p class=\"text-success\"><i class=\"fas fa-check\"></i> Oui</p>" : "<p class=\"text-danger\"><i class=\"far fa-times-circle\"></i> Non</p>"%></td>
                                                 </tr>
                                             <% } %>
                                             </tbody>

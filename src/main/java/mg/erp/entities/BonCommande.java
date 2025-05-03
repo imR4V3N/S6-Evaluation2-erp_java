@@ -21,6 +21,8 @@ public class BonCommande {
     private String currency;
     private String in_words;
     private String company;
+    private boolean isReceived;
+    private boolean isPaid;
     // Getters & Setters
 
 
@@ -112,7 +114,22 @@ public class BonCommande {
         this.company = company;
     }
 
-    public List<BonCommande> fetchAndFilterBonsDeCommande(String fournisseurName, String url, HttpEntity<String> entity) throws Exception {
+    public boolean getIsReceived() {
+        return isReceived;
+    }
+
+    public void setIsReceived(boolean isReceived) {
+        this.isReceived = isReceived;
+    }
+    public boolean getIsPaid() {
+        return isPaid;
+    }
+
+    public void setIsPaid(boolean isPaid) {
+        this.isPaid = isPaid;
+    }
+
+    public List<BonCommande> fetchAndFilterBonsDeCommande(String fournisseurName, String url, HttpEntity<String> entity, String baseUrl) throws Exception {
         List<BonCommande> result = new ArrayList<>();
         RestTemplate restTemplate = new RestTemplate();
 
@@ -121,7 +138,10 @@ public class BonCommande {
         JsonNode bonList = response.getBody().path("data");
         for (JsonNode bon : bonList) {
             if (fournisseurName.equalsIgnoreCase(bon.path("supplier_name").asText())) {
-                result.add(mapJsonToBonCommande(bon));
+                BonCommande commande = mapJsonToBonCommande(bon);
+                boolean isPaid = isBonCommandePaye(commande.getName(), baseUrl, entity);
+                commande.setIsPaid(isPaid);
+                result.add(commande);
             }
         }
         return result;
@@ -141,7 +161,34 @@ public class BonCommande {
         commande.setCurrency(bon.path("currency").asText());
         commande.setIn_words(bon.path("in_words").asText());
         commande.setCompany(bon.path("company").asText());
+        commande.setIsReceived(false);
+        if (bon.path("per_received").asDouble() == 100.0) {
+            commande.setIsReceived(true);
+        }
+
         return commande;
     }
+
+    private boolean isBonCommandePaye(String bonCommandeName, String baseUrl, HttpEntity<String> entity) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+        String url = baseUrl + "/api/resource/Purchase Invoice?filters=[[\"Purchase Invoice Item\",\"purchase_order\",\"=\",\"" + bonCommandeName + "\"]]";
+        ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+        JsonNode factures = response.getBody().path("data");
+
+        if (!factures.isArray() || factures.size() == 0) {
+            return false; // Aucun paiement car aucune facture
+        }
+
+        for (JsonNode facture : factures) {
+            String status = facture.path("status").asText();
+            if (!"Paid".equalsIgnoreCase(status)) {
+                return false; // Une facture non payée => bon non payé
+            }
+        }
+
+        return true; // Toutes les factures liées sont payées
+    }
+
 }
 

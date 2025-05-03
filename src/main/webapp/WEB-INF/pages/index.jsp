@@ -48,13 +48,13 @@
                             <form method="POST" action="<%=contextPath%>/login" class="needs-validation" novalidate="">
                                 <div class="form-group">
                                     <label for="email">Email</label>
-                                    <input id="email" type="text"  class="form-control" name="username" tabindex="1" required autofocus>
+                                    <input id="email" type="text"  class="form-control" name="username" value="Administrator" tabindex="1" required autofocus>
                                 </div>
                                 <div class="form-group">
                                     <div class="d-block">
                                         <label for="password" class="control-label">Password</label>
                                     </div>
-                                    <input id="password" type="password" class="form-control" name="password" tabindex="2" required>
+                                    <input id="password" type="password" class="form-control"  name="password" value="admin" tabindex="2" required>
                                 </div>
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
