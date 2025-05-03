@@ -2,8 +2,6 @@ package mg.erp.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import mg.erp.entities.Auth;
@@ -78,7 +76,7 @@ public class ComptableController {
     }
 
     @PostMapping("/facture/payer")
-    public String validerPaiement(@RequestParam("factureName") String factureName, HttpSession session) {
+    public String validerPaiement(@RequestParam("factureName") String factureName, @RequestParam("payement") String payement, HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
         ObjectMapper mapper = new ObjectMapper();
         String baseUrl = new Config().getErpUrl(configurableEnvironment);
@@ -95,7 +93,7 @@ public class ComptableController {
             JsonNode paymentEntry = facture.fetchPaymentEntry(restTemplate, mapper, baseUrl, headers, factureName);
 
             // Étape 2 : Modification des données du message
-            facture.modifyPaymentEntry(paymentEntry);
+            facture.modifyPaymentEntry(paymentEntry, Double.valueOf(payement));
 
             // Étape 3 : Sauvegarde et soumission
             facture.saveAndSubmitPaymentEntry(restTemplate, mapper, baseUrl, headers, paymentEntry);

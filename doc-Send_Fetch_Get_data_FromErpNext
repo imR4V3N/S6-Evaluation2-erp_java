@@ -1,0 +1,95 @@
+package mg.erp.services;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+public class ERPNextService {
+
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // 1. Envoyer des données (POST ou PUT)
+    public JsonNode sendToERPNext(String endpoint, JsonNode payload, String sid) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> entity = new HttpEntity<>(payload.toString(), headers);
+        ResponseEntity<JsonNode> response = restTemplate.exchange(endpoint, HttpMethod.POST, entity, JsonNode.class);
+        return response.getBody();
+    }
+
+    // 2. Recevoir avec paramètres (POST avec body)
+    public JsonNode fetchFromERPNextWithParams(String endpoint, JsonNode payload, String sid) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> entity = new HttpEntity<>(payload.toString(), headers);
+        ResponseEntity<JsonNode> response = restTemplate.exchange(endpoint, HttpMethod.POST, entity, JsonNode.class);
+        return response.getBody();
+    }
+
+    // 3. GET simple sans données envoyées
+    public JsonNode getFromERPNext(String endpoint, String sid) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        ResponseEntity<JsonNode> response = restTemplate.exchange(endpoint, HttpMethod.GET, entity, JsonNode.class);
+        return response.getBody();
+    }
+
+    // Exemple de traitement de la réponse
+    public void exempleUsage(String sid) {
+        // Exemple 1 : créer un nouvel Item
+        ObjectNode data = mapper.createObjectNode();
+        data.put("doctype", "Item");
+        data.put("item_code", "ARTICLE-001");
+        data.put("item_name", "Chaise en bois");
+
+        JsonNode createResponse = sendToERPNext(
+                "http://erpnext.localhost:8000/api/resource/Item",
+                data,
+                sid
+        );
+
+        if (createResponse.has("data")) {
+            String createdName = createResponse.path("data").path("name").asText();
+            System.out.println("✅ Article créé : " + createdName);
+        } else {
+            System.err.println("❌ Erreur création : " + createResponse);
+        }
+
+        // Exemple 2 : récupérer la liste des Items
+        ObjectNode filters = mapper.createObjectNode();
+        filters.put("doctype", "Item");
+        JsonNode listResponse = fetchFromERPNextWithParams(
+                "http://erpnext.localhost:8000/api/method/frappe.client.get_list",
+                filters,
+                sid
+        );
+
+        System.out.println("📄 Liste des items :");
+        listResponse.path("message").forEach(item -> {
+            System.out.println(" - " + item.path("name").asText());
+        });
+
+        // Exemple 3 : GET direct pour récupérer un Item
+        JsonNode getResponse = getFromERPNext(
+                "http://erpnext.localhost:8000/api/resource/Item/ARTICLE-001",
+                sid
+        );
+
+        if (getResponse.has("data")) {
+            String itemName = getResponse.path("data").path("item_name").asText();
+            System.out.println("📦 Détail item : " + itemName);
+        }
+    }
+}

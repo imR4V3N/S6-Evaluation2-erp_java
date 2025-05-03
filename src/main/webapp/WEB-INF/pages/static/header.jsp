@@ -22,6 +22,9 @@
                 <div class="dropdown-title"><%=auth.getFull_name()%></div>
 
                 <div class="dropdown-divider"></div>
+                <a href="http://erpnext.localhost:8000" class="dropdown-item has-icon text-dark"> <i class="fas fa-cogs text-info"></i>
+                    ERPNext
+                </a>
                 <a href="<%=contextPath%>/logout" class="dropdown-item has-icon text-danger"> <i class="fas fa-sign-out-alt"></i>
                     Logout
                 </a>

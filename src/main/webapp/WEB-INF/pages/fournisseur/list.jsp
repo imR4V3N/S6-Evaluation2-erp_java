@@ -71,7 +71,7 @@
                                                     <td><%=fournisseur.getCountry()%></td>
                                                     <td><%=fournisseur.getSupplier_type()%></td>
                                                     <td><%=fournisseur.getSupplier_group()%></td>
-                                                    <td><a href="<%=contextPath%>/fournisseur/demandeDevis?name=<%=fournisseur.getName()%>" class="btn btn-info">Devis</a></td>
+                                                    <td><a href="<%=contextPath%>/fournisseur/devis-fournisseur?name=<%=fournisseur.getName()%>" class="btn btn-info">Devis</a></td>
                                                     <td><a href="<%=contextPath%>/fournisseur/bon-commandes?name=<%=fournisseur.getName()%>" class="btn btn-info">Commande</a></td>
                                                 </tr>
                                             <% } %>

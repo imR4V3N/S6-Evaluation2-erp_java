@@ -1,5 +1,8 @@
 <%@ page import="java.util.List" %>
-<%@ page import="mg.erp.entities.Facture" %>
+<%@ page import="mg.erp.entities.Fournisseur" %>
+<%@ page import="mg.erp.entities.DemandeDevis" %>
+<%@ page import="mg.erp.entities.DemandeDevis" %>
+<%@ page import="mg.erp.entities.DevisFournisseur" %><%--
   Created by IntelliJ IDEA.
   User: raven
   Date: 01/05/2025
@@ -9,12 +12,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String contextPath = request.getContextPath();
-    List<Facture> factures = (List<Facture>) request.getAttribute("factures");
-    String message = (String) request.getAttribute("message");
+    List<DevisFournisseur> devisFournisseurs = (List<DevisFournisseur>) request.getAttribute("devisFournisseurs");
+    String fournisseur = (String) request.getAttribute("fournisseur");
 %>
 <html>
 <head>
-    <title>Facture</title>
+    <title>Demande de devis</title>
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/app.min.css">
     <!-- Template CSS -->
     <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/datatables/datatables.min.css">
@@ -40,15 +43,16 @@
                 <div class="section-body">
                     <div class="row">
                         <div class="col-12">
-                            <% if (factures.size() > 0 && factures!= null) {%>
+                            <% if (devisFournisseurs.size() > 0 && devisFournisseurs!= null) {%>
                             <div class="card">
                                 <div class="card-header">
-                                    <h4>Facture</h4>
+                                    <h4>Devis du fournisseurs <%=fournisseur%></h4>
                                 </div>
                                 <div class="card-body">
                                     <nav aria-label="breadcrumb">
                                         <ol class="breadcrumb">
-                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-clipboard-list"></i> Factures</li>
+                                            <li class="breadcrumb-item"><a href="<%=contextPath%>/fournisseur"><i class="fas fa-user-friends"></i> Fournisseurs</a></li>
+                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-file-alt"></i>Devis fournisseur</li>
                                         </ol>
                                     </nav>
                                     <div class="table-responsive">
@@ -56,42 +60,36 @@
                                             <thead>
                                             <tr>
                                                 <th>Nom</th>
-                                                <th>Fournisseur</th>
-                                                <th>Date de facture</th>
-                                                <th>Date d'échéance</th>
-                                                <th>Montant dû</th>
-                                                <th>Montant total</th>
-                                                <th>Devise</th>
                                                 <th>Status</th>
-                                                <th>Action</th>
+                                                <th>Entreprise</th>
+                                                <th>Date de Transaction</th>
+                                                <th>Valide Jusqu'à</th>
+                                                <th>Devise</th>
+                                                <th>Quantité Totale</th>
+                                                <th>Total</th>
+                                                <th>Total Général</th>
+                                                <th>Adresse du Fournisseur</th>
+                                                <th>Adresse de Livraison</th>
+                                                <th>Adresse de Facturation</th>
+                                                <th>Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <% for (Facture facture : factures) { %>
+                                            <% for (DevisFournisseur devisFournisseur : devisFournisseurs) { %>
                                             <tr>
-                                                <td><%= facture.getName() %></td>
-                                                <td><%= facture.getSupplier() %></td>
-                                                <td><%= facture.getPosting_date() %></td>
-                                                <td><%= facture.getDue_date() %></td>
-                                                <td><%= facture.getOutstanding_amount() %></td>
-                                                <td><%= facture.getGrand_total() %></td>
-                                                <td><%= facture.getCurrency() %></td>
-                                                <% if (!"Paid".equalsIgnoreCase(facture.getStatus())) { %>
-                                                    <td class="text-danger"><%= facture.getStatus() %></td>
-                                                <% } else { %>
-                                                    <td class="text-success"><%= facture.getStatus() %></td>
-                                                <% } %>
-
-                                                <td>
-                                                    <% if (!"Paid".equalsIgnoreCase(facture.getStatus())) { %>
-                                                    <form method="post" action="<%=contextPath%>/comptable/facture/payer" style="display: flex">
-                                                        <input type="hidden" name="factureName" value="<%=facture.getName() %>" />
-                                                        <input type="hidden" id="montantDu" name="montantDu" value="<%=facture.getOutstanding_amount() %>" />
-                                                        <input type="text" id="payement" class="form-control me-2" style="width: 100px;" name="payement" value="<%=facture.getOutstanding_amount() %>" />
-                                                        <button type="submit" class="btn btn-info btn-sm">Payer</button>
-                                                    </form>
-                                                    <% } %>
-                                                </td>
+                                                <td><%= devisFournisseur.getName() %></td>
+                                                <td><%= devisFournisseur.getStatus() %></td>
+                                                <td><%= devisFournisseur.getCompany() %></td>
+                                                <td><%= devisFournisseur.getTransactionDate() %></td>
+                                                <td><%= devisFournisseur.getValidTill() %></td>
+                                                <td><%= devisFournisseur.getCurrency() %></td>
+                                                <td><%= devisFournisseur.getTotalQty() %></td>
+                                                <td><%= devisFournisseur.getTotal() %> $</td>
+                                                <td><%= devisFournisseur.getGrandTotal() %> $</td>
+                                                <td><%= devisFournisseur.getSupplierAddress() %></td>
+                                                <td><%= devisFournisseur.getShippingAddress() %></td>
+                                                <td><%= devisFournisseur.getBillingAddress() %></td>
+                                                <td><a href="<%=contextPath%>/fournisseur/devis-fournisseur/<%=devisFournisseur.getName()%>/items" class="btn btn-info">Details</a></td>
                                             </tr>
                                             <% } %>
                                             </tbody>
@@ -103,8 +101,8 @@
                                 <div class="alert alert-light alert-has-icon">
                                     <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
                                     <div class="alert-body">
-                                        <div class="alert-title">Aucun facture</div>
-                                        <a href="http://erpnext.localhost:8000/app/purchase-invoice" class="btn btn-link">Faire une nouvelle facture</a>
+                                        <div class="alert-title">Aucun devis de fournisseur</div>
+                                        <a href="http://erpnext.localhost:8000/app/supplier-quotation" class="btn btn-link">Faire une nouvelle devis de fournisseur</a>
                                     </div>
                                 </div>
                             <% } %>
@@ -121,27 +119,6 @@
     </div>
 </div>
 </body>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function (e) {
-            const montantDu = parseFloat(document.getElementById('montantDu').value);
-            const payement = parseFloat(document.getElementById('payement').value);
-
-            if (isNaN(montantDu) || isNaN(payement)) {
-                alert("Montant invalide.");
-                e.preventDefault();
-                return;
-            }
-
-            if (payement > montantDu) {
-                alert("Le montant payé ne peut pas être inférieur au montant dû.");
-                e.preventDefault(); // Empêche la soumission
-            }
-        });
-    });
-</script>
-
 <script src="<%=contextPath%>/assets/js/app.min.js"></script>
 <!-- JS Libraies -->
 <!-- Page Specific JS File -->
