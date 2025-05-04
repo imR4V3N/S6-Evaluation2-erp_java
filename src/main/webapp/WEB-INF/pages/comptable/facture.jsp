@@ -10,7 +10,6 @@
 <%
     String contextPath = request.getContextPath();
     List<Facture> factures = (List<Facture>) request.getAttribute("factures");
-    String message = (String) request.getAttribute("message");
 %>
 <html>
 <head>
@@ -51,6 +50,26 @@
                                             <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-clipboard-list"></i> Factures</li>
                                         </ol>
                                     </nav>
+                                    <% if (request.getAttribute("error") != null) { %>
+                                    <div class="alert alert-danger alert-dismissible show fade">
+                                        <div class="alert-body">
+                                            <button class="close" data-dismiss="alert">
+                                                <span>&times;</span>
+                                            </button>
+                                            <%= request.getAttribute("error") %>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                                    <% if (request.getAttribute("message") != null) { %>
+                                    <div class="alert alert-success alert-dismissible show fade">
+                                        <div class="alert-body">
+                                            <button class="close" data-dismiss="alert">
+                                                <span>&times;</span>
+                                            </button>
+                                            <%= request.getAttribute("message") %>
+                                        </div>
+                                    </div>
+                                    <% } %>
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover" id="tableExport" style="width:100%;">
                                             <thead>
@@ -87,7 +106,7 @@
                                                     <form method="post" action="<%=contextPath%>/comptable/facture/payer" style="display: flex">
                                                         <input type="hidden" name="factureName" value="<%=facture.getName() %>" />
                                                         <input type="hidden" id="montantDu" name="montantDu" value="<%=facture.getOutstanding_amount() %>" />
-                                                        <input type="text" id="payement" class="form-control me-2" style="width: 100px;" name="payement" value="<%=facture.getOutstanding_amount() %>" />
+                                                        <input type="number" step="0.01" id="payement" class="form-control me-2" style="width: 100px;" name="payement" value="<%=facture.getOutstanding_amount() %>" />
                                                         <button type="submit" class="btn btn-info btn-sm">Payer</button>
                                                     </form>
                                                     <% } %>
