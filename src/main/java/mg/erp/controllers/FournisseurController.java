@@ -1,22 +1,19 @@
 package mg.erp.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import mg.erp.entities.*;
 import mg.erp.utils.Config;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -190,14 +187,41 @@ public class FournisseurController {
 
         String baseUrl = new Config().getErpUrl(configurableEnvironment);
         HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
+        Map<String, Object> res = devisFournisseurItem.fetchItemsForDevis(name, entity, baseUrl);
 
-        List<DevisFournisseurItem> devisFournisseurItems = devisFournisseurItem.fetchItemsForDevis(name, entity, baseUrl);
-
+        List<DevisFournisseurItem> devisFournisseurItems = (List<DevisFournisseurItem>) res.get("items");
+        String supplier = res.get("supplier").toString();
 
         request.setAttribute("devisName", name);
+        request.setAttribute("supplier", supplier);
         request.setAttribute("devisFournisseurItems", devisFournisseurItems);
 
         return "fournisseur/produitDevisFournisseur";
+    }
+
+//    --------------------------------- MODIFIER DEVIS FOURNISSEUR ITEM PRIX ---------------------------------------------------
+
+    @PostMapping("/devis-fournisseur/{devisName}/items/edit")
+    public String modifierPrixItemDevisViaForm(
+            @PathVariable("devisName") String devisName,
+            @RequestParam("supplier") String supplier,
+            @RequestParam("itemCode") String itemCode,
+            @RequestParam("rate") double rate,
+            RedirectAttributes redirectAttributes,
+            HttpSession session
+    ) {
+        try {
+            String nouveauDevisName = devisFournisseurItem.modifierPrixItemDevis(devisName, itemCode, rate, session, configurableEnvironment);
+
+            redirectAttributes.addFlashAttribute("message",
+                    "Prix modifié avec succès pour le devis : " + nouveauDevisName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error",
+                    "Erreur lors de la modification du prix : " + e.getMessage());
+        }
+
+        return "redirect:/fournisseur/devis-fournisseur?name=" + supplier;
     }
 
 
@@ -230,7 +254,5 @@ public class FournisseurController {
             return "redirect:/fournisseur";
         }
     }
-
-
 
 }

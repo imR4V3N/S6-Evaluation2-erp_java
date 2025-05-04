@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.List;
 
 @Controller
@@ -40,10 +42,6 @@ public class ComptableController {
         return new HttpEntity<>(headers);
     }
 
-    private String getRequestMessage(HttpServletRequest request) {
-        return request.getAttribute("message") != null ? request.getAttribute("message").toString() : "";
-    }
-
     // Handle the request for the facture page
     @GetMapping("/factures")
     public String factures(HttpServletRequest request, HttpSession session) {
@@ -59,7 +57,6 @@ public class ComptableController {
 
             List<Facture> factures = facture.fetchFactures(apiUrl, entity);
             request.setAttribute("factures", factures);
-            request.setAttribute("message", getRequestMessage(request));
             return "comptable/facture";
         } catch (HttpClientErrorException e) {
             e.printStackTrace();
@@ -76,7 +73,7 @@ public class ComptableController {
     }
 
     @PostMapping("/facture/payer")
-    public String validerPaiement(@RequestParam("factureName") String factureName, @RequestParam("payement") String payement, HttpSession session) {
+    public String validerPaiement(@RequestParam("factureName") String factureName, @RequestParam("payement") String payement, HttpSession session, RedirectAttributes redirectAttributes) {
         RestTemplate restTemplate = new RestTemplate();
         ObjectMapper mapper = new ObjectMapper();
         String baseUrl = new Config().getErpUrl(configurableEnvironment);
@@ -98,8 +95,10 @@ public class ComptableController {
             // Étape 3 : Sauvegarde et soumission
             facture.saveAndSubmitPaymentEntry(restTemplate, mapper, baseUrl, headers, paymentEntry);
 
-            System.out.println("Facture payée avec succès.");
+            System.out.println();
+            redirectAttributes.addFlashAttribute("message", "Facture "+factureName+" payée avec succès.");
         } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Un probleme survenue lors de la validation du paiement de la facture "+factureName+" : "+e.getMessage()+" .");
             e.printStackTrace();
         }
 

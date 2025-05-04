@@ -55,6 +55,26 @@
                                             <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-file-alt"></i>Devis fournisseur</li>
                                         </ol>
                                     </nav>
+                                    <% if (request.getAttribute("error") != null) { %>
+                                    <div class="alert alert-danger alert-dismissible show fade">
+                                        <div class="alert-body">
+                                            <button class="close" data-dismiss="alert">
+                                                <span>&times;</span>
+                                            </button>
+                                            <%= request.getAttribute("error") %>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                                    <% if (request.getAttribute("message") != null) { %>
+                                    <div class="alert alert-success alert-dismissible show fade">
+                                        <div class="alert-body">
+                                            <button class="close" data-dismiss="alert">
+                                                <span>&times;</span>
+                                            </button>
+                                            <%= request.getAttribute("message") %>
+                                        </div>
+                                    </div>
+                                    <% } %>
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover" id="tableExport" style="width:100%;">
                                             <thead>
@@ -78,7 +98,7 @@
                                             <% for (DevisFournisseur devisFournisseur : devisFournisseurs) { %>
                                             <tr>
                                                 <td><%= devisFournisseur.getName() %></td>
-                                                <td><%= devisFournisseur.getStatus() %></td>
+                                                <td><%= devisFournisseur.getStatus().equalsIgnoreCase("Submitted") ? "<p class=\"text text-info\">"+ devisFournisseur.getStatus()+"</p>" : "<p class=\"text text-danger\">"+ devisFournisseur.getStatus()+"</p>" %></td>
                                                 <td><%= devisFournisseur.getCompany() %></td>
                                                 <td><%= devisFournisseur.getTransactionDate() %></td>
                                                 <td><%= devisFournisseur.getValidTill() %></td>

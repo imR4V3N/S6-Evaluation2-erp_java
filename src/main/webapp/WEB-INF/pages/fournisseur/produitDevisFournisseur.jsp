@@ -11,6 +11,7 @@
     String contextPath = request.getContextPath();
     List<DevisFournisseurItem> devisFournisseurItems = (List<DevisFournisseurItem>) request.getAttribute("devisFournisseurItems");
     String devisName = (String) request.getAttribute("devisName");
+    String supplier = (String) request.getAttribute("supplier");
 %>
 <html>
 <head>
@@ -46,6 +47,14 @@
                                     <h4>Details du demande de devis <%=devisName%></h4>
                                 </div>
                                 <div class="card-body">
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="<%=contextPath%>/fournisseur"><i class="fas fa-user-friends"></i> Fournisseurs</a></li>
+                                            <li class="breadcrumb-item"><a href="<%=contextPath%>/fournisseur/devis-fournisseur?name=<%=supplier%>"><i class="fas fa-file-alt"></i> Devis fournisseur</a></li>
+                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-archive"></i>Item devis fournisseur</li>
+                                        </ol>
+                                    </nav>
+
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover" id="tableExport" style="width:100%;">
                                             <thead>
@@ -69,8 +78,9 @@
                                                 <td><%= produit.getAmount() %> $</td>
                                                 <td><%= produit.getUom() %></td>
                                                 <td>
-                                                    <form action="modifier-prix" method="post" class="d-flex">
-                                                        <input type="hidden" name="name" value="<%= produit.getItemName() %>" />
+                                                    <form action="<%=contextPath%>/fournisseur/devis-fournisseur/<%=devisName %>/items/edit" method="post" class="d-flex">
+                                                        <input type="hidden" name="itemCode" value="<%= produit.getItemCode() %>" />
+                                                        <input type="hidden" name="supplier" value="<%=supplier %>" />
                                                         <input type="number" step="0.01" name="rate" value="<%= produit.getRate() %>" class="form-control me-2" style="width: 100px;" />
                                                         <button type="submit" class="btn btn-primary btn-sm">Modifier</button>
                                                     </form>
