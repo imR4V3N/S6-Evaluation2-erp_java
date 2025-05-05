@@ -218,7 +218,7 @@ public class FournisseurController {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error",
-                    "Erreur lors de la modification du prix : " + e.getMessage());
+                    "Erreur lors de la modification du prix!");
         }
 
         return "redirect:/fournisseur/devis-fournisseur?name=" + supplier;
