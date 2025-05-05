@@ -59,8 +59,9 @@
                                                 <th>Country</th>
                                                 <th>Type</th>
                                                 <th>Group</th>
-                                                <th>Devis</th>
+                                                <th>Devis Fournissers</th>
                                                 <th>Bon de comamnde</th>
+                                                <th>Demmande de devis</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -71,8 +72,9 @@
                                                     <td><%=fournisseur.getCountry()%></td>
                                                     <td><%=fournisseur.getSupplier_type()%></td>
                                                     <td><%=fournisseur.getSupplier_group()%></td>
-                                                    <td><a href="<%=contextPath%>/fournisseur/devis-fournisseur?name=<%=fournisseur.getName()%>" class="btn btn-info">Devis</a></td>
-                                                    <td><a href="<%=contextPath%>/fournisseur/bon-commandes?name=<%=fournisseur.getName()%>" class="btn btn-info">Commande</a></td>
+                                                    <td><a href="<%=contextPath%>/fournisseur/devis-fournisseur?name=<%=fournisseur.getName()%>" class="btn btn-info">Details</a></td>
+                                                    <td><a href="<%=contextPath%>/fournisseur/bon-commandes?name=<%=fournisseur.getName()%>" class="btn btn-info">Details</a></td>
+                                                    <td><a href="<%=contextPath%>/fournisseur/demandeDevis?name=<%=fournisseur.getName()%>" class="btn btn-info">Details</a></td>
                                                 </tr>
                                             <% } %>
                                             </tbody>

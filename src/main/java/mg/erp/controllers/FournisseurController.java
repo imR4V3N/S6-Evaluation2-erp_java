@@ -27,6 +27,7 @@ import java.util.stream.StreamSupport;
 public class FournisseurController {
     private final ConfigurableEnvironment configurableEnvironment;
     private final Fournisseur fournisseur = new Fournisseur();
+    private final DemandeDevis demandeDevis = new DemandeDevis();
     private final DevisFournisseurItem devisFournisseurItem = new DevisFournisseurItem();
     private final DevisFournisseur devisFournisseur = new DevisFournisseur();
     private final BonCommande bonCommande = new BonCommande();
@@ -73,27 +74,27 @@ public class FournisseurController {
 
 //    -------------------------------------------- DEMANDE DEVIS --------------------------------------------------
 
-//    @GetMapping("/demandeDevis")
-//    public String demandeDevis(@RequestParam("name") String name, HttpServletRequest request, HttpSession session) {
-//        Auth user = (Auth) session.getAttribute("user");
-//
-//        if (user.getSid() == null) {
-//            return "redirect:/";
-//        }
-//
-//        HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
-//
-//        try {
-//            List<DemandeDevis> result = demandeDevis.fetchDevisForSupplier(name, user.getSid(), entity, configurableEnvironment);
-//            request.setAttribute("demandeDevis", result);
-//            request.setAttribute("fournisseur", name);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            request.setAttribute("error", "Erreur de récupération des devis : " + e.getMessage());
-//        }
-//
-//        return "fournisseur/demandeDevis";
-//    }
+    @GetMapping("/demandeDevis")
+    public String demandeDevis(@RequestParam("name") String name, HttpServletRequest request, HttpSession session) {
+        Auth user = (Auth) session.getAttribute("user");
+
+        if (user.getSid() == null) {
+            return "redirect:/";
+        }
+
+        HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
+
+        try {
+            List<DemandeDevis> result = demandeDevis.fetchDevisForSupplier(name, user.getSid(), entity, configurableEnvironment);
+            request.setAttribute("demandeDevis", result);
+            request.setAttribute("fournisseur", name);
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Erreur de récupération des devis : " + e.getMessage());
+        }
+
+        return "fournisseur/demandeDevis";
+    }
 //
 //    @GetMapping("/demandeDevis/{devisName}/produits")
 //    public String produitsParDevis(@PathVariable("devisName") String devisName, HttpServletRequest request, HttpSession session) {

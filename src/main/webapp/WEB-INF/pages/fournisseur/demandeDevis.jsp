@@ -48,15 +48,21 @@
                                     <h4>Demande de devis du fournisseurs <%=fournisseur%></h4>
                                 </div>
                                 <div class="card-body">
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="<%=contextPath%>/fournisseur"><i class="fas fa-user-friends"></i> Fournisseurs</a></li>
+                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-file-signature"></i>Demande de devis</li>
+                                        </ol>
+                                    </nav>
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover" id="tableExport" style="width:100%;">
                                             <thead>
                                             <tr>
                                                 <th>Nom</th>
                                                 <th>Date</th>
-                                                <th>Total</th>
+                                                <th>Total quatite</th>
                                                 <th>Status</th>
-                                                <th>Actions</th>
+<%--                                                <th>Actions</th>--%>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -64,9 +70,9 @@
                                                 <tr>
                                                     <td><%=demandeDevis1.getName()%></td>
                                                     <td><%=demandeDevis1.getTransaction_date()%></td>
-                                                    <td><%=demandeDevis1.getTotal()%> $</td>
+                                                    <td><%=demandeDevis1.getTotal()%></td>
                                                     <td><%=demandeDevis1.getStatus()%></td>
-                                                    <td><a href="<%=contextPath%>/fournisseur/demandeDevis/<%=demandeDevis1.getName()%>/produits" class="btn btn-info">Details</a></td>
+<%--                                                    <td><a href="<%=contextPath%>/fournisseur/demandeDevis/<%=demandeDevis1.getName()%>/produits" class="btn btn-info">Details</a></td>--%>
                                                 </tr>
                                             <% } %>
                                             </tbody>

@@ -123,7 +123,7 @@ public class DemandeDevis {
             produit.setQty(item.path("qty").asDouble());
 
             double rate = item.path("rate").asDouble(); // ou item.path("price_list_rate")
-            total += produit.getQty() * rate;
+            total += produit.getQty();
 
             produit.setRate(String.valueOf(rate));
             items.add(produit);
