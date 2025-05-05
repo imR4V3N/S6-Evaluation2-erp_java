@@ -85,7 +85,7 @@
                                     <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
                                     <div class="alert-body">
                                         <div class="alert-title">Aucun fournisseur</div>
-                                        <a href="http://erpnext.localhost:8000/app/customer" class="btn btn-link">Creer un nouveau fournisseur</a>
+                                        <a href="http://erpnext.localhost:8000/app/supplier" class="btn btn-link">Creer un nouveau fournisseur</a>
                                     </div>
                                 </div>
                             <% } %>

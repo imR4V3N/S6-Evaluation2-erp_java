@@ -98,7 +98,7 @@ public class ComptableController {
             System.out.println();
             redirectAttributes.addFlashAttribute("message", "Facture "+factureName+" payée avec succès.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Un probleme survenue lors de la validation du paiement de la facture "+factureName+" : "+e.getMessage()+" .");
+            redirectAttributes.addFlashAttribute("error", "Un probleme survenue lors de la validation du paiement de la facture "+factureName);
             e.printStackTrace();
         }
 

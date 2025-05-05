@@ -138,9 +138,7 @@ public class BonCommande {
         JsonNode bonList = response.getBody().path("data");
         for (JsonNode bon : bonList) {
             if (fournisseurName.equalsIgnoreCase(bon.path("supplier_name").asText())) {
-                BonCommande commande = mapJsonToBonCommande(bon);
-                boolean isPaid = isBonCommandePaye(commande.getName(), baseUrl, entity);
-                commande.setIsPaid(isPaid);
+                BonCommande commande = mapJsonToBonCommande(bon, baseUrl, entity);
                 result.add(commande);
             }
         }
@@ -148,7 +146,7 @@ public class BonCommande {
     }
 
 
-    private BonCommande mapJsonToBonCommande(JsonNode bon) {
+    private BonCommande mapJsonToBonCommande(JsonNode bon, String baseUrl, HttpEntity<String> entity) throws Exception {
         BonCommande commande = new BonCommande();
         commande.setName(bon.path("name").asText());
         commande.setSupplier(bon.path("supplier").asText());
@@ -164,6 +162,10 @@ public class BonCommande {
         commande.setIsReceived(false);
         if (bon.path("per_received").asDouble() == 100.0) {
             commande.setIsReceived(true);
+        }
+        if (bon.path("per_billed").asDouble() == 100.0) {
+            boolean isPaid = isBonCommandePaye(commande.getName(), baseUrl, entity);
+            commande.setIsPaid(isPaid);
         }
 
         return commande;

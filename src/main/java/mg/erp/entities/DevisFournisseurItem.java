@@ -146,6 +146,39 @@ public class DevisFournisseurItem {
             throw new RuntimeException("Le devis " + devisName + " est annulé et ne peut pas être modifié.");
         }
 
+        // 2. Récupérer tous les bons de commande (sans filtre sur supplier_quotation)
+        ResponseEntity<JsonNode> poCheck = restTemplate.exchange(
+                erpUrl + "/api/resource/Purchase Order?fields=[\"name\", \"ref_sq\", \"docstatus\"]",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                JsonNode.class
+        );
+
+        // Parcourir les bons de commande pour trouver ceux associés au devis fournisseur
+        boolean poFound = false;
+        for (JsonNode po : poCheck.getBody().path("data")) {
+            if (po.path("ref_sq").asText().equals(devisName)) {
+                poFound = true;
+                String poName = po.path("name").asText();
+                int poDocStatus = po.path("docstatus").asInt();
+
+                // Annuler le bon de commande uniquement si aucune réception ou facture n'est associée
+                if (poDocStatus == 1) {
+                    Map<String, Object> cancelPOPayload = Map.of("docstatus", 2);
+                    restTemplate.exchange(
+                            erpUrl + "/api/resource/Purchase Order/" + poName,
+                            HttpMethod.PUT,
+                            new HttpEntity<>(cancelPOPayload, headers),
+                            String.class
+                    );
+                }
+            }
+        }
+
+        if (!poFound) {
+            System.out.println("Aucun bon de commande lié à ce devis fournisseur.");
+        }
+
         // Vérifier si l'item existe dans le devis et récupérer l'ID complet de l'item
         String itemId = null;
         for (JsonNode item : items) {
@@ -219,7 +252,6 @@ public class DevisFournisseurItem {
             throw new RuntimeException("Erreur lors de la mise à jour de l'item : " + e.getMessage());
         }
 
-
         // 5. Soumettre le nouveau devis
         if (!nouveauDevisName.equals(devisName)) {
             Map<String, Object> submitPayload = Map.of("docstatus", 1);
@@ -236,4 +268,3 @@ public class DevisFournisseurItem {
 
 
 }
-
