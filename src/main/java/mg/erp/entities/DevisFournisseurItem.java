@@ -263,6 +263,21 @@ public class DevisFournisseurItem {
             );
         }
 
+        if (nouveauDevisName.equals(devisName) && docstatus == 0) {
+            restTemplate.exchange(
+                    erpUrl + "/api/resource/Supplier Quotation/" + nouveauDevisName,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(Map.of(), headers),
+                    String.class
+            );
+            restTemplate.exchange(
+                    erpUrl + "/api/resource/Supplier Quotation/" + nouveauDevisName,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(Map.of("docstatus", 1), headers),
+                    String.class
+            );
+        }
+
         return nouveauDevisName;
     }
 

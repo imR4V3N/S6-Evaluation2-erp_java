@@ -15,3 +15,9 @@ II - Choisir un fournisseur
 III - mode comptable (accounting)  
 &nbsp;&nbsp;&nbsp;&nbsp;i - voir les factures avec status  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 - payer 
+
+### Jour 3
+I - Créer une page d’import dans existingapp 
+
+**Remarque** : lors de la mise à jour des prix, le supplier quotation est automatiquement validé “submit” (et non plus draft)
+
