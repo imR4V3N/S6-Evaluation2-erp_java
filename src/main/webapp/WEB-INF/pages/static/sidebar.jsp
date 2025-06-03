@@ -1,3 +1,4 @@
+<%@ page import="java.time.YearMonth" %>
 <%
     String contextPath = request.getContextPath();
 %>
@@ -9,17 +10,30 @@
                     class="logo-name">ERP</span>
             </a>
         </div>
+<%--        <ul class="sidebar-menu">--%>
+<%--            <li class="menu-header">Fournisseur</li>--%>
+<%--            <li class="dropdown">--%>
+<%--                <a href="<%=contextPath%>/fournisseur" class="nav-link"><i class="fas fa-user-friends"></i><span>Fournisseurs</span></a>--%>
+<%--            </li>--%>
+<%--            <li class="menu-header">Mode comptable</li>--%>
+<%--            <li class="dropdown">--%>
+<%--                <a href="#" class="menu-toggle nav-link has-dropdown"><i class="fas fa-university"></i><span>Comptable</span></a>--%>
+<%--                <ul class="dropdown-menu">--%>
+<%--                    <li><a class="nav-link" href="<%=contextPath%>/comptable/factures">Factures</a></li>--%>
+<%--                </ul>--%>
+<%--            </li>--%>
+<%--        </ul>--%>
         <ul class="sidebar-menu">
-            <li class="menu-header">Fournisseur</li>
+            <li class="menu-header">RH</li>
             <li class="dropdown">
-                <a href="<%=contextPath%>/fournisseur" class="nav-link"><i class="fas fa-user-friends"></i><span>Fournisseurs</span></a>
-            </li>
-            <li class="menu-header">Mode comptable</li>
-            <li class="dropdown">
-                <a href="#" class="menu-toggle nav-link has-dropdown"><i class="fas fa-university"></i><span>Comptable</span></a>
+                <a href="#" class="menu-toggle nav-link has-dropdown"><i class="fas fa-user-friends"></i><span>Employees</span></a>
                 <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<%=contextPath%>/comptable/factures">Factures</a></li>
+                    <li><a class="nav-link" href="<%=contextPath%>/employee">Listes</a></li>
+                    <li><a class="nav-link" href="<%=contextPath%>/employee/fiche?mois=<%=YearMonth.now()%>">Fiche de paie</a></li>
                 </ul>
+            </li>
+            <li class="dropdown">
+                <a href="<%=contextPath%>/data/page-import" class="nav-link"><i class="fas fa-file-export"></i><span>Import</span></a>
             </li>
         </ul>
     </aside>

@@ -1,15 +1,11 @@
 package mg.erp.entities;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpSession;
 import mg.erp.utils.Config;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -1,8 +1,5 @@
 package mg.erp.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import mg.erp.entities.*;
@@ -11,16 +8,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Controller
 @RequestMapping("/fournisseur")
@@ -60,6 +51,7 @@ public class FournisseurController {
         HttpEntity<String> httpEntity = buildHttpEntityWithSid(user.getSid());
 
         try {
+
             ResponseEntity<String> response = fournisseur.executeFournisseurRequest(url, httpEntity);
             List<Fournisseur> fournisseurs = fournisseur.parseFournisseursFromResponse(response.getBody());
 
