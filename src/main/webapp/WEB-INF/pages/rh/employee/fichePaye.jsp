@@ -33,11 +33,11 @@
     <!-- Template CSS -->
     <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/datatables/datatables.min.css">
     <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="assets/bundles/bootstrap-social/bootstrap-social.css">
-    <link rel="stylesheet" href="assets/bundles/summernote/summernote-bs4.css">
+    <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/bootstrap-social/bootstrap-social.css">
+    <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/summernote/summernote-bs4.css">
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/style.css">
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/components.css">
-    <link rel="stylesheet" href="assets/bundles/select2/dist/css/select2.min.css">
+    <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/select2/dist/css/select2.min.css">
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/custom.css">
     <link rel='shortcut icon' type='image/x-icon' href='<%=contextPath%>/assets/img/favicon.ico' />
 </head>
@@ -207,10 +207,10 @@
 <script src="<%=contextPath%>/assets/bundles/datatables/export-tables/buttons.print.min.js"></script>
 <script src="<%=contextPath%>/assets/js/page/datatables.js"></script>
 
-<script src="assets/bundles/summernote/summernote-bs4.js"></script>
-<script src="assets/bundles/select2/dist/js/select2.full.min.js"></script>
+<script src="<%=contextPath%>/assets/bundles/summernote/summernote-bs4.js"></script>
+<script src="<%=contextPath%>/assets/bundles/select2/dist/js/select2.full.min.js"></script>
 <!-- Page Specific JS File -->
-<script src="assets/js/page/forms-advanced-forms.js"></script>
+<script src="<%=contextPath%>/assets/js/page/forms-advanced-forms.js"></script>
 <!-- Template JS File -->
 <script src="<%=contextPath%>/assets/js/scripts.js"></script>
 <!-- Custom JS File -->

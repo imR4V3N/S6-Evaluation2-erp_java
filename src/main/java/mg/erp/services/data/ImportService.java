@@ -42,7 +42,7 @@ public class ImportService {
             System.out.println("File 3 encoded, size: "+ file3.getSize());
         }
 
-        String url = baseUrl + "/hrms.data.import_controller.import_csv";
+        String url = baseUrl + "/api/method/hrms.data.import_controller.import_csv";
         WebClient client = webClientBuilder.baseUrl(url).build();
 
         try {

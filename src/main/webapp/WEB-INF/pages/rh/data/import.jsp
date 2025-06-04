@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/style.css">
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/components.css">
-    <link rel="stylesheet" href="assets/bundles/select2/dist/css/select2.min.css">
+    <link rel="stylesheet" href="<%=contextPath%>/assets/bundles/select2/dist/css/select2.min.css">
     <link rel="stylesheet" href="<%=contextPath%>/assets/css/custom.css">
     <link rel='shortcut icon' type='image/x-icon' href='<%=contextPath%>/assets/img/favicon.ico' />
 </head>
@@ -66,7 +66,7 @@
                                                         <button class="close" data-dismiss="alert">
                                                             <span>&times;</span>
                                                         </button>
-                                                        <strong><%=success%></strong>
+                                                        <strong><i class="fas fa-check"></i>  <%=success%></strong>
                                                         <br>
                                                         <%-- HERE --%>
                                                         <% if (insertRecords != null && !insertRecords.isEmpty()) { %>
@@ -75,10 +75,10 @@
 
                                                                 <% for (Map.Entry<String, List<Object>> entry : insertRecords.entrySet()) { %>
                                                                 <div class="card border-success mb-2 p-2">
-                                                                    <strong><%= entry.getKey() %></strong>
+                                                                    <strong class="text text-dark"><%= entry.getKey() %></strong>
                                                                     <ul>
                                                                         <% for (Object record : entry.getValue()) { %>
-                                                                        <li><%= record.toString() %></li>
+                                                                            <li class="text text-black-50"><%= record.toString() %></li>
                                                                         <% } %>
                                                                     </ul>
                                                                 </div>
@@ -94,7 +94,7 @@
                                                         <button class="close" data-dismiss="alert">
                                                             <span>&times;</span>
                                                         </button>
-                                                        <strong><%=error%></strong>
+                                                        <strong><i class="fas fa-times"></i>  <%=error%></strong>
                                                         <br>
                                                         <%-- HERE --%>
                                                         <%if (validationErrors != null && !validationErrors.isEmpty()) { %>
@@ -116,23 +116,26 @@
                                             <%}%>
                                             <form method="post" action="<%=contextPath%>/data/import/api" enctype="multipart/form-data" class="col-12">
                                                 <div class="section-title">Fichier 1 (Employee)</div>
-                                                <div class="custom-file">
-                                                    <input type="file" name="file1" class="custom-file-input" id="customFile">
-                                                    <label class="custom-file-label" for="customFile">Choose file</label>
-                                                </div>
-                                                <div class="section-title">Fichier 2 (Salary Structure & Salary Component)</div>
-                                                <div class="custom-file">
-                                                    <input type="file" name="file2" class="custom-file-input" id="customFile">
-                                                    <label class="custom-file-label" for="customFile">Choose file</label>
-                                                </div>
-                                                <div class="section-title">Fichier 3 (Salary Structure Assignement & Salary Slip)</div>
-                                                <div class="custom-file">
-                                                    <input type="file" name="file3" class="custom-file-input" id="customFile">
-                                                    <label class="custom-file-label" for="customFile">Choose file</label>
+                                                <div class="custom-file mb-3">
+                                                    <input type="file" name="file1" class="custom-file-input" id="file1" accept=".csv">
+                                                    <label class="custom-file-label" for="file1">Choisir un fichier</label>
                                                 </div>
 
-                                                <button type="submit" style="width: 15%;margin-top: 2em" class="btn btn-primary p-2 col-3">Importer</button>
+                                                <div class="section-title">Fichier 2 (Salary Structure & Salary Component)</div>
+                                                <div class="custom-file mb-3">
+                                                    <input type="file" name="file2" class="custom-file-input" id="file2" accept=".csv">
+                                                    <label class="custom-file-label" for="file2">Choisir un fichier</label>
+                                                </div>
+
+                                                <div class="section-title">Fichier 3 (Salary Structure Assignment & Salary Slip)</div>
+                                                <div class="custom-file mb-3">
+                                                    <input type="file" name="file3" class="custom-file-input" id="file3" accept=".csv">
+                                                    <label class="custom-file-label" for="file3">Choisir un fichier</label>
+                                                </div>
+
+                                                <button type="submit" style="width: 15%; margin-top: 2em" class="btn btn-primary p-2 col-3">Importer</button>
                                             </form>
+
                                         </div>
                                     </div>
                                 </div>
@@ -163,11 +166,12 @@
 <script src="<%=contextPath%>/assets/bundles/datatables/export-tables/buttons.print.min.js"></script>
 <script src="<%=contextPath%>/assets/js/page/datatables.js"></script>
 
-<script src="assets/bundles/select2/dist/js/select2.full.min.js"></script>
+<script src="<%=contextPath%>/assets/bundles/select2/dist/js/select2.full.min.js"></script>
 <!-- Page Specific JS File -->
-<script src="assets/js/page/forms-advanced-forms.js"></script>
+<script src="<%=contextPath%>/assets/js/page/forms-advanced-forms.js"></script>
 <!-- Template JS File -->
 <script src="<%=contextPath%>/assets/js/scripts.js"></script>
+<script src="<%=contextPath%>/assets/js/file.js"></script>
 <!-- Custom JS File -->
 <script src="<%=contextPath%>/assets/js/custom.js"></script>
 </html>
