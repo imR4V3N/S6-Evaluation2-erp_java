@@ -56,7 +56,7 @@ public class HomeController {
             if (auth.isLoginSuccessful(auth, sid)) {
                 auth.setSid(sid);
                 session.setAttribute("user", auth);
-                return "redirect:/fournisseur";
+                return "redirect:/employee?nom=&prenom=&ageMin=&ageMax=&genre=&poste=";
             }
 
         } catch (Exception e) {
