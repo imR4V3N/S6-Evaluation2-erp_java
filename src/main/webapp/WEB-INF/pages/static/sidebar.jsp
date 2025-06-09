@@ -33,6 +33,12 @@
                 </ul>
             </li>
             <li class="dropdown">
+                <a href="#" class="menu-toggle nav-link has-dropdown"><i class="fas fa-chart-bar"></i><span>Salaires</span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="<%=contextPath%>/salaire/statistique?annee=2025">Statistiques</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
                 <a href="<%=contextPath%>/data/page-import" class="nav-link"><i class="fas fa-file-export"></i><span>Import</span></a>
             </li>
         </ul>

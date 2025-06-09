@@ -37,7 +37,6 @@ public class EmployeeController {
         this.configurableEnvironment = configurableEnvironment;
     }
 
-
     private HttpEntity<String> buildHttpEntityWithSid(String sid) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
@@ -58,9 +57,9 @@ public class EmployeeController {
             return "redirect:/";
         }
 
-        String empUrl = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Employee?fields=[\"*\"]";
-        String desUrl = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Designation?fields=[\"designation_name\"]";
-        String genreUrl = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Gender?fields=[\"gender\"]";
+        String empUrl = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Employee?fields=[\"*\"]&limit_page_length=2000000";
+        String desUrl = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Designation?fields=[\"designation_name\"]&limit_page_length=2000000";
+        String genreUrl = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Gender?fields=[\"gender\"]&limit_page_length=2000000";
 
         HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
         try {
@@ -92,13 +91,14 @@ public class EmployeeController {
             return "redirect:/";
         }
 
-        String url = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Salary Slip?filters=[[\"employee\",\"=\",\""+idEmp+"\"]]&fields=[\"*\"]";
+        String baseUrl = new Config().getErpUrl(configurableEnvironment);
+        String url = baseUrl + "/api/resource/Salary Slip?filters=[[\"employee\",\"=\",\""+idEmp+"\"]]&fields=[\"*\"]&limit_page_length=2000000";
         HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
         try {
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-            List<FichePaye> fichePayes = fichePaye.getFiches(response.getBody());
+            List<FichePaye> fichePayes = fichePaye.getFiches(response.getBody(), baseUrl, entity);
             List<FichePaye> ficheParMois = fichePaye.regrouperFichesParMois(fichePayes);
             FichePaye fichePaye1 = ficheParMois.stream().filter(f -> f.getYearMonth().equals(mois))
                     .findFirst()
@@ -136,13 +136,13 @@ public class EmployeeController {
     public String fiche(HttpSession session, HttpServletRequest request, @RequestParam("mois") String mois) {
         Auth user = (Auth) session.getAttribute("user");
 
-        String url = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Salary Slip?fields=[\"*\"]";
+        String url = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Salary Slip?fields=[\"*\"]&limit_page_length=2000000";
         HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
         try {
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-            List<FichePaye> fichePayes = fichePaye.getFiches(response.getBody());
+            List<FichePaye> fichePayes = fichePaye.getFiches(response.getBody(), new Config().getErpUrl(configurableEnvironment), entity);
             Map<String, List<SalarySummary>> parEmploye = salarySummary.regrouperFichesParMoisEtParEmploye(fichePayes);
             request.setAttribute("summaries", parEmploye.get(mois));
             request.setAttribute("mois", mois);
