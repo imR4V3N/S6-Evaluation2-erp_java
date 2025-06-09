@@ -123,6 +123,8 @@
                                                 <th>Date de naissance</th>
                                                 <th>Date d'embauhe</th>
                                                 <th>Status</th>
+                                                <th>Poste</th>
+                                                <th>Departement</th>
                                                 <th>Compagnie</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -137,6 +139,8 @@
                                                     <td><%=emp.getDate_of_birth()%></td>
                                                     <td><%=emp.getDate_of_joining()%></td>
                                                     <td><%=emp.getStatus()%></td>
+                                                    <td><%=emp.getDesignation()%></td>
+                                                    <td><%=emp.getDepartment()%></td>
                                                     <td><%=emp.getCompany()%></td>
                                                     <td><a href="<%=contextPath%>/employee/fiche-paye?idEmp=<%=emp.getName()%>&mois=<%=YearMonth.now()%>" class="btn btn-info">Fiche de paye</a></td>
                                                 </tr>
@@ -150,8 +154,8 @@
                                 <div class="alert alert-light alert-has-icon">
                                     <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
                                     <div class="alert-body">
-                                        <div class="alert-title">Aucun employee</div>
-                                        <a href="http://erpnext.localhost:8000/app/employee" class="btn btn-link">Ajouter un nouveau employee</a>
+                                        <div class="alert-title">Aucun donnee</div>
+                                        <a href="http://localhost:8080/data/page-import" class="btn btn-link">Importer des donnes</a>
                                     </div>
                                 </div>
                             <% } %>

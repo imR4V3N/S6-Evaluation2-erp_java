@@ -174,7 +174,7 @@ public class BonCommande {
     private boolean isBonCommandePaye(String bonCommandeName, String baseUrl, HttpEntity<String> entity) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
 
-        String url = baseUrl + "/api/resource/Purchase Invoice?filters=[[\"Purchase Invoice Item\",\"purchase_order\",\"=\",\"" + bonCommandeName + "\"]]";
+        String url = baseUrl + "/api/resource/Purchase Invoice?filters=[[\"Purchase Invoice Item\",\"purchase_order\",\"=\",\"" + bonCommandeName + "\"]]&limit_page_length=2000";
         ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
         JsonNode factures = response.getBody().path("data");
 

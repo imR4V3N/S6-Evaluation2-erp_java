@@ -6,7 +6,8 @@
 <%@ page import="java.time.YearMonth" %>
 <%@ page import="mg.erp.entities.rh.SalarySummary" %>
 <%@ page import="java.util.Set" %>
-<%@ page import="java.util.LinkedHashSet" %><%--
+<%@ page import="java.util.LinkedHashSet" %>
+<%@ page import="java.util.Map" %><%--
   Created by IntelliJ IDEA.
   User: raven
   Date: 01/05/2025
@@ -68,63 +69,92 @@
                                 </div>
                             </div>
 
-                            <% if (summaries != null && !summaries.isEmpty()) {
-                                Set<String> allComponents = new LinkedHashSet<>();
-                                for (SalarySummary summary : summaries) {
-                                    allComponents.addAll(summary.getComponentTotals().keySet());
-                                }
-                            %>
+                            <% if (summaries != null && !summaries.isEmpty()) { %>
                             <div class="card">
                                 <div class="card-header">
-                                    <h4>Employee</h4>
+                                    <h4>Fiche de paie</h4>
                                 </div>
                                 <div class="card-body">
                                     <nav aria-label="breadcrumb">
                                         <ol class="breadcrumb">
-                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-user-friends"></i> Employees</li>
+                                            <li class="breadcrumb-item active" aria-current="page">
+                                                <i class="fas fa-user-friends"></i> Fiche de paie
+                                            </li>
                                         </ol>
                                     </nav>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped table-hover" id="tableExport" style="width:100%;">
-                                            <thead class="table-dark">
+                                            <thead>
                                             <tr>
                                                 <th>Employé</th>
                                                 <th>Mois</th>
                                                 <th>Paie brute</th>
                                                 <th>Paie nette</th>
-                                                <% for (String comp : allComponents) { %>
-                                                <th><%= comp %></th>
-                                                <% } %>
+                                                <th>Paie déduit</th>
+                                                <th>Détails</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <% for (SalarySummary summary : summaries) { %>
+                                            <% int id = 0;
+                                                for (SalarySummary summary : summaries) {
+                                                    String modalId = "detailsModal" + id;%>
                                             <tr>
                                                 <td><%= summary.getNomEmployee() %></td>
                                                 <td><%= summary.getMonth() %></td>
                                                 <td><%= String.format("%.2f", summary.getTotalPayBrut()) %> $</td>
                                                 <td><%= String.format("%.2f", summary.getTotalPayNet()) %> $</td>
+                                                <td><%= String.format("%.2f", summary.getTotalPayDeduction()) %> $</td>
+                                                <td>
+                                                    <a class="btn btn-primary" data-toggle="collapse" href="#<%=modalId%>" role="button"
+                                                       aria-expanded="false" aria-controls="<%=modalId%>">Details</a>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <div class="collapse multi-collapse" id="<%=modalId%>">
+                                                                <h6>Structure de salaire :</h6>
+                                                                <ul>
+                                                                    <% for (Map.Entry<String, Double> entry : summary.getComponentTotals().entrySet()) { %>
+                                                                    <li><strong><%= entry.getKey() %></strong> : <%= String.format("%.2f", entry.getValue()) %> $</li>
+                                                                    <% } %>
+                                                                </ul>
 
-                                                <% for (String comp : allComponents) {
-                                                    Double value = summary.getComponentTotals().getOrDefault(comp, 0.0);
-                                                %>
-                                                <td><%= String.format("%.2f", value) %> $</td>
-                                                <% } %>
+                                                                <hr>
+
+                                                                <h6>Composants : <span class="text-success">Earnings</span></h6>
+                                                                <ul>
+                                                                    <% if (summary.getComponentEarnings() != null) {
+                                                                        for (Map.Entry<String, Double> entry : summary.getComponentEarnings().entrySet()) { %>
+                                                                    <li><%= entry.getKey() %> : <%= String.format("%.2f", entry.getValue()) %> $</li>
+                                                                    <%   }
+                                                                    } %>
+                                                                </ul>
+
+                                                                <h6>Composants : <span class="text-danger">Deductions</span></h6>
+                                                                <ul>
+                                                                    <% if (summary.getComponentDeductions() != null) {
+                                                                        for (Map.Entry<String, Double> entry : summary.getComponentDeductions().entrySet()) { %>
+                                                                    <li><%= entry.getKey() %> : <%= String.format("%.2f", entry.getValue()) %> $</li>
+                                                                    <%   }
+                                                                    } %>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
                                             </tr>
-                                            <% } %>
+                                            <% id++;} %>
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
                             </div>
                             <% } else {%>
-                            <div class="alert alert-light alert-has-icon">
-                                <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
-                                <div class="alert-body">
-                                    <div class="alert-title">Aucun employee</div>
-                                    <a href="http://erpnext.localhost:8000/app/employee" class="btn btn-link">Ajouter un nouveau employee</a>
+                                <div class="alert alert-light alert-has-icon">
+                                    <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
+                                    <div class="alert-body">
+                                        <div class="alert-title">Aucun donnee</div>
+                                        <a href="http://localhost:8080/data/page-import" class="btn btn-link">Importer des donnes</a>
+                                    </div>
                                 </div>
-                            </div>
                             <% } %>
                         </div>
                     </div>

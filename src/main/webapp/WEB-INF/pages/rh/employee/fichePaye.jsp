@@ -1,14 +1,11 @@
 <%@ page import="java.util.List" %>
 <%@ page import="mg.erp.entities.Fournisseur" %>
-<%@ page import="mg.erp.entities.rh.Employee" %>
-<%@ page import="mg.erp.entities.rh.Genre" %>
-<%@ page import="mg.erp.entities.rh.Designation" %>
-<%@ page import="mg.erp.entities.rh.FichePaye" %>
 <%@ page import="java.time.YearMonth" %>
 <%@ page import="com.google.gson.Gson" %>
 <%@ page import="java.net.URLEncoder" %>
 <%@ page import="mg.erp.utils.YearMonthAdapter" %>
-<%@ page import="com.google.gson.GsonBuilder" %><%--
+<%@ page import="com.google.gson.GsonBuilder" %>
+<%@ page import="mg.erp.entities.rh.*" %><%--
   Created by IntelliJ IDEA.
   User: raven
   Date: 01/05/2025
@@ -131,7 +128,7 @@
                                               Structure de salaire
                                             </span>
                                             <span class="float-right text-muted">
-                                              <%=fichePaye.getSalary_structure()%>
+                                              <%=fichePaye.getSalary_structure().getName()%>
                                             </span>
                                         </p>
                                         <p class="clearfix">
@@ -152,6 +149,14 @@
                                         </p>
                                         <p class="clearfix">
                                             <span class="float-left">
+                                              Deduction total
+                                            </span>
+                                            <span class="float-right text-muted">
+                                              <%=fichePaye.getTotal_deduction()%> $
+                                            </span>
+                                        </p>
+                                        <p class="clearfix">
+                                            <span class="float-left">
                                               Periode
                                             </span>
                                             <span class="float-right text-muted">
@@ -167,19 +172,45 @@
                                             </span>
                                         </p>
 
+                                        <p class="clearfix">
+                                            <span class="float-left">
+                                              Earnings
+                                            </span>
+                                            <span class="float-right text-muted">
+                                                <ul>
+                                                  <% for (SalaryComponent component : fichePaye.getSalary_structure().getEarings()) {%>
+                                                        <li><%=component.getSalary_component() %> - <%=component.getAmount() %> $ </li>
+                                                  <% } %>
+                                                </ul>
+                                            </span>
+                                        </p>
+
+
+                                        <p class="clearfix">
+                                            <span class="float-left">
+                                              Deductions
+                                            </span>
+                                            <span class="float-right text-muted">
+                                                <ul>
+                                                  <% for (SalaryComponent component : fichePaye.getSalary_structure().getDeductions()) {%>
+                                                        <li><%=component.getSalary_component() %> - <%=component.getAmount() %> $ </li>
+                                                  <% } %>
+                                                </ul>
+                                            </span>
+                                        </p>
 
                                     </div>
                                     <a href="<%=contextPath%>/employee/fiche-paye/export/pdf?idEmp=<%=idEmp%>&mois=<%=mois%>&data=<%=json%>" class="btn btn-success"><i class="fas fa-file-export"></i> Exporter en pdf</a>
                                 </div>
                             </div>
                             <% } else {%>
-                            <div class="alert alert-light alert-has-icon">
-                                <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
-                                <div class="alert-body">
-                                    <div class="alert-title">Aucun fiche de paye</div>
-                                    <a href="http://erpnext.localhost:8000/app/salary-slip" class="btn btn-link">Ajouter un nouveau fiche de paye</a>
+                                <div class="alert alert-light alert-has-icon">
+                                    <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
+                                    <div class="alert-body">
+                                        <div class="alert-title">Aucun donnee</div>
+                                        <a href="http://localhost:8080/data/page-import" class="btn btn-link">Importer des donnes</a>
+                                    </div>
                                 </div>
-                            </div>
                             <% } %>
                         </div>
                     </div>

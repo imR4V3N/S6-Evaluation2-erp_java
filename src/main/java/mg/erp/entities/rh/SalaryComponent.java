@@ -19,6 +19,7 @@ public class SalaryComponent {
     String amount_based_on_formula;
     String depends_on_payment_days;
     String company;
+    double amount;
 
     public String getName() {
         return name;
@@ -83,6 +84,14 @@ public class SalaryComponent {
 
     public void setDepends_on_payment_days(String depends_on_payment_days) {
         this.depends_on_payment_days = depends_on_payment_days;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     public List<SalaryComponent> getSalaryComponents(HttpEntity<String> entity, String url) throws Exception {
