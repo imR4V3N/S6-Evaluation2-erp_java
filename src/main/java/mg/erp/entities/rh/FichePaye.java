@@ -1,17 +1,23 @@
 package mg.erp.entities.rh;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import jakarta.servlet.http.HttpServletResponse;
+import mg.erp.entities.Auth;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
 import java.io.*;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -487,4 +493,66 @@ public class FichePaye {
         cell.setPadding(5);
         return cell;
     }
+
+    public String save(String sid, String baseUrl, String doctype, String json) throws Exception {
+        HttpResponse<String> response = Unirest.post(baseUrl + "/api/resource/"+doctype)
+                .header("Content-Type", "application/json")
+                .header("Cookie", "sid=" + sid)
+                .body(json)
+                .asString();
+
+        if (!response.isSuccess()) {
+            throw new Exception("Erreur lors de la sauvegarde du "+doctype+" : " + response.getBody());
+        } else {
+            System.out.println(doctype +" sauvegardé avec succès : " + response.getBody());
+        }
+        return "Tous les salary slips ont été sauvegardés avec succès.";
+    }
+//    public void genererFichePayeParMois(Employee emp, String salaryStructureName, List<YearMonth> moisGenerer, double value, String baseUrl, Auth user) throws Exception {
+//        // 1. Connexion initiale
+//        HttpEntity<MultiValueMap<String, String>> httpEntity = user.buildHttpEntity("Administrator", "admin");
+//        ResponseEntity<Auth> res = user.executeLoginRequest(baseUrl + "/api/method/login", httpEntity);
+//        String sid = user.extractSidFromCookies(res.getHeaders());
+//
+//        if (sid == null) {
+//            throw new Exception("Échec de la connexion : session ID non trouvé.");
+//        }
+//
+//        for (YearMonth date : moisGenerer) {
+//            try {
+//                // --- 1. Création et sauvegarde du Salary Structure Assignment ---
+//                String assignementJson = this.createSalaryStructureAssignmentJson(emp, salaryStructureName, date, value);
+//                this.save(sid, baseUrl, "Salary Structure Assignment", assignementJson);
+//
+//                // --- 2. Création et sauvegarde du Salary Slip ---
+//                String slipJson = this.createSalarySlipJsonFromStructure(emp, date, salaryStructureName);
+//                this.save(sid, baseUrl, "Salary Slip", slipJson);
+//
+//            } catch (Exception e) {
+//                if (e.getMessage().contains("session_expired")) {
+//                    System.out.println("Session expirée, reconnexion en cours...");
+//
+//                    // Reconnexion
+//                    res = user.executeLoginRequest(baseUrl + "/api/method/login", httpEntity);
+//                    sid = user.extractSidFromCookies(res.getHeaders());
+//
+//                    if (sid == null) {
+//                        throw new Exception("Échec de la reconnexion : session ID non trouvé.");
+//                    }
+//
+//                    // Retry après reconnexion
+//                    String assignementJson = this.createSalaryStructureAssignmentJson(emp, salaryStructureName, date, value);
+//                    this.save(sid, baseUrl, "Salary Structure Assignment", assignementJson);
+//
+//                    String slipJson = this.createSalarySlipJsonFromStructure(emp, date, salaryStructureName);
+//                    this.save(sid, baseUrl, "Salary Slip", slipJson);
+//                } else {
+//                    throw new Exception("Erreur lors de la génération des fiches de paie pour " + date + " : " + e.getMessage(), e);
+//                }
+//            }
+//        }
+//
+//        System.out.println("✅ Tous les salary slips ont été générés avec succès.");
+//    }
+
 }

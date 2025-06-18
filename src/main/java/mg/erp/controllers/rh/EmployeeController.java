@@ -92,7 +92,7 @@ public class EmployeeController {
         }
 
         String baseUrl = new Config().getErpUrl(configurableEnvironment);
-        String url = baseUrl + "/api/resource/Salary Slip?filters=[[\"employee\",\"=\",\""+idEmp+"\"]]&fields=[\"*\"]&limit_page_length=2000000";
+        String url = baseUrl + "/api/resource/Salary Slip?filters=[[\"employee\",\"=\",\""+idEmp+"\"], [\"docstatus\",\"!=\",\"2\"]]&fields=[\"*\"]&limit_page_length=2000000";
         HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -136,7 +136,7 @@ public class EmployeeController {
     public String fiche(HttpSession session, HttpServletRequest request, @RequestParam("mois") String mois) {
         Auth user = (Auth) session.getAttribute("user");
 
-        String url = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Salary Slip?fields=[\"*\"]&limit_page_length=2000000";
+        String url = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Salary Slip?filters=[[\"docstatus\",\"!=\",\"2\"]]&fields=[\"*\"]&limit_page_length=2000000";
         HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
         try {
             RestTemplate restTemplate = new RestTemplate();
