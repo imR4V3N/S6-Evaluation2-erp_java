@@ -1,4 +1,5 @@
 <%@ page import="java.time.YearMonth" %>
+<%@ page import="java.time.Year" %>
 <%
     String contextPath = request.getContextPath();
 %>
@@ -6,7 +7,7 @@
 <div class="main-sidebar sidebar-style-2">
     <aside id="sidebar-wrapper">
         <div class="sidebar-brand">
-            <a href="<%=contextPath%>/fournisseur"> <img alt="image" src="<%=contextPath%>/assets/img/logo.png" class="header-logo" /> <span
+            <a href="<%=contextPath%>/employee"> <img alt="image" src="<%=contextPath%>/assets/img/logo.png" class="header-logo" /> <span
                     class="logo-name">ERP</span>
             </a>
         </div>
@@ -35,7 +36,9 @@
             <li class="dropdown">
                 <a href="#" class="menu-toggle nav-link has-dropdown"><i class="fas fa-chart-bar"></i><span>Salaires</span></a>
                 <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<%=contextPath%>/salaire/statistique?annee=2025">Statistiques</a></li>
+                    <li><a class="nav-link" href="<%=contextPath%>/salaire/statistique?annee=<%=Year.now()%>">Statistiques</a></li>
+                    <li><a class="nav-link" href="<%=contextPath%>/salaire/data">Generer</a></li>
+                    <li><a class="nav-link" href="<%=contextPath%>/salaire/modif">Modification</a></li>
                 </ul>
             </li>
             <li class="dropdown">

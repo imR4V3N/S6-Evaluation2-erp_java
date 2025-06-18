@@ -52,7 +52,7 @@
                                 <div class="card-body">
                                     <nav aria-label="breadcrumb">
                                         <ol class="breadcrumb">
-                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-user-friends"></i> Import</li>
+                                            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-file-export"></i> Import</li>
                                         </ol>
                                     </nav>
                                     <div class="card">

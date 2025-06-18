@@ -63,7 +63,7 @@ public class HomeController {
             e.printStackTrace();
         }
 
-        request.setAttribute("error", "Identifiants incorrects");
+        request.setAttribute("error", "Identifiants incorrects ou Serveur indisponible");
         return "index";
     }
 

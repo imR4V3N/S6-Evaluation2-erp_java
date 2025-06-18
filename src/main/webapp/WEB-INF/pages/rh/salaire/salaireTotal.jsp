@@ -183,6 +183,7 @@
                                                     <td>
                                                         <a class="btn btn-primary" data-toggle="collapse" href="#<%=modalId%>" role="button"
                                                            aria-expanded="false" aria-controls="<%=modalId%>">Elements</a>
+
                                                         <div class="row">
                                                             <div class="col">
                                                                 <div class="collapse multi-collapse" id="<%=modalId%>">

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SalarySummary {
+    private String salarySlip;
     private String idEmployee;
     private String nomEmployee;
     private String month;
@@ -28,6 +29,14 @@ public class SalarySummary {
     private Map<String, Double> componentTotals = new HashMap<>();
     private Map<String, Double> componentEarnings;
     private Map<String, Double> componentDeductions;
+
+    public String getSalarySlip() {
+        return salarySlip;
+    }
+
+    public void setSalarySlip(String salarySlip) {
+        this.salarySlip = salarySlip;
+    }
 
     public String getIdEmployee() {
         return idEmployee;
@@ -114,6 +123,75 @@ public class SalarySummary {
                                             FichePaye premiere = ficheList.get(0);
 
                                             SalarySummary summary = new SalarySummary();
+                                            summary.setSalarySlip(premiere.getName());
+                                            summary.setIdEmployee(idEmp);
+                                            summary.setNomEmployee(premiere.getEmployee_name());
+                                            summary.setMonth(YearMonth.from(LocalDate.parse(premiere.getEnd_date())).toString());
+
+                                            Map<String, Double> totals = new HashMap<>();
+                                            double totalNet = 0;
+                                            double totalBrut = 0;
+                                            double totalDeduit = 0;
+
+                                            Map<String, Double> componentEarnings = new HashMap<>();
+                                            Map<String, Double> componentDeductions = new HashMap<>();
+
+                                            for (FichePaye fiche : ficheList) {
+                                                String comp = fiche.getSalary_structure().getName();
+                                                double net = fiche.getNet_pay();
+                                                double brut = fiche.getGross_pay();
+                                                double deduit = fiche.getTotal_deduction();
+
+                                                totals.put(comp, totals.getOrDefault(comp, 0.0) + net);
+                                                totalNet += net;
+                                                totalBrut += brut;
+                                                totalDeduit += deduit;
+
+                                                // Earnings
+                                                fiche.getSalary_structure().getEarings().forEach(compo -> {
+                                                    String label = compo.getSalary_component();
+                                                    double amount = compo.getAmount();
+                                                    componentEarnings.put(label,
+                                                            componentEarnings.getOrDefault(label, 0.0) + amount);
+                                                });
+
+                                                // Deductions
+                                                fiche.getSalary_structure().getDeductions().forEach(compo -> {
+                                                    String label = compo.getSalary_component();
+                                                    double amount = compo.getAmount();
+                                                    componentDeductions.put(label,
+                                                            componentDeductions.getOrDefault(label, 0.0) + amount);
+                                                });
+                                            }
+
+                                            summary.setComponentTotals(totals);
+                                            summary.setTotalPayNet(totalNet);
+                                            summary.setTotalPayBrut(totalBrut);
+                                            summary.setTotalPayDeduction(totalDeduit);
+                                            summary.setComponentEarnings(componentEarnings);
+                                            summary.setComponentDeductions(componentDeductions);
+
+                                            return summary;
+                                        })
+                                        .collect(Collectors.toList())
+                        )
+                ));
+    }
+
+    public Map<YearMonth, List<SalarySummary>> regrouperFichesParMoisEtParEmploye2(List<FichePaye> slips) {
+        return slips.stream()
+                .collect(Collectors.groupingBy(
+                        slip -> YearMonth.from(LocalDate.parse(slip.getEnd_date())), // clé : yyyy-MM
+                        Collectors.collectingAndThen(
+                                Collectors.groupingBy(FichePaye::getEmployee),
+                                mapParEmploye -> mapParEmploye.entrySet().stream()
+                                        .map(entry -> {
+                                            String idEmp = entry.getKey();
+                                            List<FichePaye> ficheList = entry.getValue();
+                                            FichePaye premiere = ficheList.get(0);
+
+                                            SalarySummary summary = new SalarySummary();
+                                            summary.setSalarySlip(premiere.getName());
                                             summary.setIdEmployee(idEmp);
                                             summary.setNomEmployee(premiere.getEmployee_name());
                                             summary.setMonth(YearMonth.from(LocalDate.parse(premiere.getEnd_date())).toString());
