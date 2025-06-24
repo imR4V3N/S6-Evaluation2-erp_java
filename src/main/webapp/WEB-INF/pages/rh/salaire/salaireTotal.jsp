@@ -2,6 +2,7 @@
 <%@ page import="mg.erp.entities.rh.SalarySummary" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="com.google.gson.Gson" %>
+<%@ page import="mg.erp.entities.rh.SalaryComponent" %>
 <%--
   Created by IntelliJ IDEA.
   User: raven
@@ -199,8 +200,8 @@
                                                                     <h6>Composants : <span class="text-success">Earnings</span></h6>
                                                                     <ul>
                                                                         <% if (summary.getComponentEarnings() != null) {
-                                                                            for (Map.Entry<String, Double> entry : summary.getComponentEarnings().entrySet()) { %>
-                                                                        <li><%= entry.getKey() %> : <%= String.format("%.2f", entry.getValue()) %> $</li>
+                                                                            for (SalaryComponent entry: summary.getComponentEarnings()) { %>
+                                                                        <li><%= entry.getSalary_component() %> : <%= String.format("%.2f", entry.getAmount()) %> $</li>
                                                                         <%   }
                                                                         } %>
                                                                     </ul>
@@ -208,8 +209,8 @@
                                                                     <h6>Composants : <span class="text-danger">Deductions</span></h6>
                                                                     <ul>
                                                                         <% if (summary.getComponentDeductions() != null) {
-                                                                            for (Map.Entry<String, Double> entry : summary.getComponentDeductions().entrySet()) { %>
-                                                                        <li><%= entry.getKey() %> : <%= String.format("%.2f", entry.getValue()) %> $</li>
+                                                                            for (SalaryComponent entry: summary.getComponentDeductions()) { %>
+                                                                        <li><%= entry.getSalary_component() %> : <%= String.format("%.2f", entry.getAmount()) %> $</li>
                                                                         <%   }
                                                                         } %>
                                                                     </ul>

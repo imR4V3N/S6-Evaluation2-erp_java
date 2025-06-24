@@ -10,6 +10,7 @@ import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import mg.erp.entities.Auth;
 import mg.erp.entities.rh.Employee;
+import mg.erp.entities.rh.SalaryComponent;
 import mg.erp.entities.rh.SalarySummary;
 import mg.erp.utils.Config;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -47,7 +48,15 @@ public class SalaryService {
     }
 
     public Double getDernierSalaireBaseAvant(SalarySummary salaire) {
-        return salaire.getComponentEarnings().getOrDefault("Salaire Base", null);
+        List<SalaryComponent> result = new ArrayList<>();
+        result.addAll(salaire.getComponentEarnings());
+        result.addAll(salaire.getComponentDeductions());
+        for (SalaryComponent component : result) {
+            if (component.getFormula().equalsIgnoreCase("base")) {
+                return component.getAmount();
+            }
+        }
+        return null;
     }
 
     public List<YearMonth> genererMoisManquantsPourEmploye(YearMonth debut, YearMonth fin, String nameEmp, Map<YearMonth, List<SalarySummary>> parEmploye) {
@@ -168,29 +177,72 @@ public class SalaryService {
     }
 
 //    UPDATE Salary *---------------------------------------------------------------------------------------
-    public Map<String, Double> mergeComponent(Map<String, Double> componentEarnings, Map<String, Double> componentDeductions) {
-        Map<String, Double> allComponents = new HashMap<>();
-        allComponents.putAll(componentEarnings);
-        allComponents.putAll(componentDeductions);
+    public List<SalaryComponent> mergeComponent(List<SalaryComponent> componentEarnings, List<SalaryComponent> componentDeductions) {
+        List<SalaryComponent> allComponents = new ArrayList<>();
+        allComponents.addAll(componentEarnings);
+        allComponents.addAll(componentDeductions);
 
         return allComponents;
     }
 
+    public void remplacer(List<SalaryComponent> earnings, SalaryComponent nouveau, String label) {
+        for (int i = 0; i < earnings.size(); i++) {
+            SalaryComponent current = earnings.get(i);
+            if (label.equals(current.getSalary_component())) {
+                earnings.set(i, nouveau);
+                break; // On sort après remplacement
+            }
+        }
+    }
+
     public SalarySummary setSalaireBase(SalarySummary salarySummary , String addition, double pourcentage) {
-        Map<String, Double> earnings = salarySummary.getComponentEarnings();
+        List<SalaryComponent> earnings = salarySummary.getComponentEarnings();
 
         if (addition.equalsIgnoreCase("+")) {
-            Double salaireBase = earnings.getOrDefault("Salaire Base", 0.0);
+            String label = "Salaire Base";
+            Double salaireBase = 0.0;
+            for (SalaryComponent component : earnings) {
+                if (component.getFormula().equalsIgnoreCase("base")) {
+                    salaireBase = component.getAmount();
+                    label = component.getSalary_component();
+                    break;
+                }
+            }
             Double resultat = salaireBase + (pourcentage/100 * salaireBase);
-            earnings.put("Salaire Base", resultat);
+            SalaryComponent nouveau = new SalaryComponent();
+            nouveau.setSalary_component(label);
+            nouveau.setAmount(resultat);
+            nouveau.setFormula("base");
+            this.remplacer(earnings, nouveau, label);
         } else if (addition.equalsIgnoreCase("-")) {
-            Double salaireBase = earnings.getOrDefault("Salaire Base", 0.0);
-            Double resultat = salaireBase + (pourcentage/100 * salaireBase);
-            earnings.put("Salaire Base", resultat);
+            String label = "Salaire Base";
+            Double salaireBase = 0.0;
+            for (SalaryComponent component : earnings) {
+                if (component.getFormula().equalsIgnoreCase("base")) {
+                    salaireBase = component.getAmount();
+                    label = component.getSalary_component();
+                    break;
+                }
+            }
+            Double resultat = salaireBase - (pourcentage/100 * salaireBase);
+            SalaryComponent nouveau = new SalaryComponent();
+            nouveau.setSalary_component(label);
+            nouveau.setAmount(resultat);
+            nouveau.setFormula("base");
+            this.remplacer(earnings, nouveau, label);
         }
 
         salarySummary.setComponentEarnings(earnings);
         return salarySummary;
+    }
+
+    public Double getOrDefault(List<SalaryComponent> allComponents, String element) {
+        for (SalaryComponent component : allComponents) {
+            if (component.getSalary_component().equalsIgnoreCase(element)) {
+                return component.getAmount();
+            }
+        }
+        return 0.0; // Si l'élément n'est pas trouvé, retourne null
     }
 
     public List<SalarySummary> getSalarySummaryCondition(Map<YearMonth, List<SalarySummary>> parEmploye,
@@ -200,8 +252,9 @@ public class SalaryService {
 
         for (Map.Entry<YearMonth, List<SalarySummary>> entry : parEmploye.entrySet()) {
             for (SalarySummary summary : entry.getValue()) {
-                Map<String, Double> allComponents = this.mergeComponent(summary.getComponentEarnings(), summary.getComponentDeductions());
-                Double value = allComponents.getOrDefault(element, null);
+                List<SalaryComponent> allComponents = this.mergeComponent(summary.getComponentEarnings(), summary.getComponentDeductions());
+                Double value = this.getOrDefault(allComponents,element);
+
                 if (value != null) {
                     if (comparaison.equalsIgnoreCase("<")){
                         if (value <= montant) {

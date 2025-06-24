@@ -1,13 +1,10 @@
 <%@ page import="java.util.List" %>
 <%@ page import="mg.erp.entities.Fournisseur" %>
-<%@ page import="mg.erp.entities.rh.Employee" %>
-<%@ page import="mg.erp.entities.rh.Genre" %>
-<%@ page import="mg.erp.entities.rh.Designation" %>
 <%@ page import="java.time.YearMonth" %>
-<%@ page import="mg.erp.entities.rh.SalarySummary" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.LinkedHashSet" %>
-<%@ page import="java.util.Map" %><%--
+<%@ page import="java.util.Map" %>
+<%@ page import="mg.erp.entities.rh.*" %><%--
   Created by IntelliJ IDEA.
   User: raven
   Date: 01/05/2025
@@ -122,8 +119,8 @@
                                                                 <h6>Composants : <span class="text-success">Earnings</span></h6>
                                                                 <ul>
                                                                     <% if (summary.getComponentEarnings() != null) {
-                                                                        for (Map.Entry<String, Double> entry : summary.getComponentEarnings().entrySet()) { %>
-                                                                    <li><%= entry.getKey() %> : <%= String.format("%.2f", entry.getValue()) %> $</li>
+                                                                        for (SalaryComponent entry : summary.getComponentEarnings()) { %>
+                                                                    <li><%= entry.getSalary_component() %> : <%= String.format("%.2f", entry.getAmount()) %> $</li>
                                                                     <%   }
                                                                     } %>
                                                                 </ul>
@@ -131,8 +128,8 @@
                                                                 <h6>Composants : <span class="text-danger">Deductions</span></h6>
                                                                 <ul>
                                                                     <% if (summary.getComponentDeductions() != null) {
-                                                                        for (Map.Entry<String, Double> entry : summary.getComponentDeductions().entrySet()) { %>
-                                                                    <li><%= entry.getKey() %> : <%= String.format("%.2f", entry.getValue()) %> $</li>
+                                                                        for (SalaryComponent entry : summary.getComponentDeductions()) { %>
+                                                                    <li><%= entry.getSalary_component() %> : <%= String.format("%.2f", entry.getAmount()) %> $</li>
                                                                     <%   }
                                                                     } %>
                                                                 </ul>

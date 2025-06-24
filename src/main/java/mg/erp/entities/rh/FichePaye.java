@@ -1,19 +1,15 @@
 package mg.erp.entities.rh;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import jakarta.servlet.http.HttpServletResponse;
-import mg.erp.entities.Auth;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import java.io.*;
 import kong.unirest.HttpResponse;
@@ -169,8 +165,11 @@ public class FichePaye {
             fichePaye.setNet_pay(data.get("net_pay").asDouble());
             fichePaye.setGross_pay(data.get("gross_pay").asDouble());
             fichePaye.setTotal_deduction(data.get("total_deduction").asDouble());
+
             SalaryStructure salaryStructure = new SalaryStructure();
             salaryStructure.setName(data.get("salary_structure").asText());
+
+            SalaryStructure existStructure = salaryStructure.getStructure(entity, baseurl, data.get("salary_structure").asText());
 
             List<SalaryComponent> earnings = new ArrayList<>();
             for (JsonNode earning : data.withArray("earnings")) {
@@ -178,6 +177,7 @@ public class FichePaye {
                 salaryComponent.setSalary_component(earning.get("salary_component").asText());
                 salaryComponent.setAmount(earning.get("amount").asDouble());
                 salaryComponent.setSalary_component_abbr(earning.get("abbr").asText());
+                salaryComponent.setFormula(existStructure.getFormula(earning.get("salary_component").asText(), earning.get("abbr").asText()));
 
                 earnings.add(salaryComponent);
             }
@@ -189,6 +189,7 @@ public class FichePaye {
                 salaryComponent.setSalary_component(deduction.get("salary_component").asText());
                 salaryComponent.setAmount(deduction.get("amount").asDouble());
                 salaryComponent.setSalary_component_abbr(deduction.get("abbr").asText());
+                salaryComponent.setFormula(existStructure.getFormula(deduction.get("salary_component").asText(), deduction.get("abbr").asText()));
 
                 deductions.add(salaryComponent);
             }
