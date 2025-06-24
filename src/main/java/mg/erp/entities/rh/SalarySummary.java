@@ -12,10 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SalarySummary {
@@ -27,8 +24,8 @@ public class SalarySummary {
     private double totalPayBrut;
     private double totalPayDeduction;
     private Map<String, Double> componentTotals = new HashMap<>();
-    private Map<String, Double> componentEarnings;
-    private Map<String, Double> componentDeductions;
+    private List<SalaryComponent> componentEarnings;
+    private List<SalaryComponent> componentDeductions;
 
     public String getSalarySlip() {
         return salarySlip;
@@ -94,19 +91,19 @@ public class SalarySummary {
         this.totalPayDeduction = totalPayDeduction;
     }
 
-    public Map<String, Double> getComponentEarnings() {
+    public List<SalaryComponent> getComponentEarnings() {
         return componentEarnings;
     }
 
-    public void setComponentEarnings(Map<String, Double> componentEarnings) {
+    public void setComponentEarnings(List<SalaryComponent> componentEarnings) {
         this.componentEarnings = componentEarnings;
     }
 
-    public Map<String, Double> getComponentDeductions() {
+    public List<SalaryComponent> getComponentDeductions() {
         return componentDeductions;
     }
 
-    public void setComponentDeductions(Map<String, Double> componentDeductions) {
+    public void setComponentDeductions(List<SalaryComponent> componentDeductions) {
         this.componentDeductions = componentDeductions;
     }
 
@@ -133,8 +130,8 @@ public class SalarySummary {
                                             double totalBrut = 0;
                                             double totalDeduit = 0;
 
-                                            Map<String, Double> componentEarnings = new HashMap<>();
-                                            Map<String, Double> componentDeductions = new HashMap<>();
+                                            Map<String, SalaryComponent> earningsMap = new HashMap<>();
+                                            Map<String, SalaryComponent> deductionsMap = new HashMap<>();
 
                                             for (FichePaye fiche : ficheList) {
                                                 String comp = fiche.getSalary_structure().getName();
@@ -151,19 +148,35 @@ public class SalarySummary {
                                                 fiche.getSalary_structure().getEarings().forEach(compo -> {
                                                     String label = compo.getSalary_component();
                                                     double amount = compo.getAmount();
-                                                    componentEarnings.put(label,
-                                                            componentEarnings.getOrDefault(label, 0.0) + amount);
+                                                    String formula = compo.getFormula();
+
+                                                    SalaryComponent existing = earningsMap.get(label);
+                                                    if (existing == null) {
+                                                        earningsMap.put(label, new SalaryComponent(label, amount, formula));
+                                                    } else {
+                                                        existing.setAmount(existing.getAmount() + amount);
+                                                    }
                                                 });
 
                                                 // Deductions
                                                 fiche.getSalary_structure().getDeductions().forEach(compo -> {
                                                     String label = compo.getSalary_component();
                                                     double amount = compo.getAmount();
-                                                    componentDeductions.put(label,
-                                                            componentDeductions.getOrDefault(label, 0.0) + amount);
+                                                    String formula = compo.getFormula();
+
+                                                    SalaryComponent existing = deductionsMap.get(label);
+                                                    if (existing == null) {
+                                                        deductionsMap.put(label, new SalaryComponent(label, amount, formula));
+                                                    } else {
+                                                        existing.setAmount(existing.getAmount() + amount);
+                                                    }
                                                 });
+
                                             }
 
+
+                                            List<SalaryComponent> componentEarnings = new ArrayList<>(earningsMap.values());
+                                            List<SalaryComponent> componentDeductions = new ArrayList<>(deductionsMap.values());
                                             summary.setComponentTotals(totals);
                                             summary.setTotalPayNet(totalNet);
                                             summary.setTotalPayBrut(totalBrut);
@@ -201,8 +214,8 @@ public class SalarySummary {
                                             double totalBrut = 0;
                                             double totalDeduit = 0;
 
-                                            Map<String, Double> componentEarnings = new HashMap<>();
-                                            Map<String, Double> componentDeductions = new HashMap<>();
+                                            Map<String, SalaryComponent> earningsMap = new HashMap<>();
+                                            Map<String, SalaryComponent> deductionsMap = new HashMap<>();
 
                                             for (FichePaye fiche : ficheList) {
                                                 String comp = fiche.getSalary_structure().getName();
@@ -219,19 +232,35 @@ public class SalarySummary {
                                                 fiche.getSalary_structure().getEarings().forEach(compo -> {
                                                     String label = compo.getSalary_component();
                                                     double amount = compo.getAmount();
-                                                    componentEarnings.put(label,
-                                                            componentEarnings.getOrDefault(label, 0.0) + amount);
+                                                    String formula = compo.getFormula();
+
+                                                    SalaryComponent existing = earningsMap.get(label);
+                                                    if (existing == null) {
+                                                        earningsMap.put(label, new SalaryComponent(label, amount, formula));
+                                                    } else {
+                                                        existing.setAmount(existing.getAmount() + amount);
+                                                    }
                                                 });
 
                                                 // Deductions
                                                 fiche.getSalary_structure().getDeductions().forEach(compo -> {
                                                     String label = compo.getSalary_component();
                                                     double amount = compo.getAmount();
-                                                    componentDeductions.put(label,
-                                                            componentDeductions.getOrDefault(label, 0.0) + amount);
+                                                    String formula = compo.getFormula();
+
+                                                    SalaryComponent existing = deductionsMap.get(label);
+                                                    if (existing == null) {
+                                                        deductionsMap.put(label, new SalaryComponent(label, amount, formula));
+                                                    } else {
+                                                        existing.setAmount(existing.getAmount() + amount);
+                                                    }
                                                 });
+
                                             }
 
+
+                                            List<SalaryComponent> componentEarnings = new ArrayList<>(earningsMap.values());
+                                            List<SalaryComponent> componentDeductions = new ArrayList<>(deductionsMap.values());
                                             summary.setComponentTotals(totals);
                                             summary.setTotalPayNet(totalNet);
                                             summary.setTotalPayBrut(totalBrut);
@@ -266,8 +295,8 @@ public class SalarySummary {
                                     double totalBrut = 0;
                                     double totalDeduit = 0;
 
-                                    Map<String, Double> componentEarnings = new HashMap<>();
-                                    Map<String, Double> componentDeductions = new HashMap<>();
+                                    Map<String, SalaryComponent> earningsMap = new HashMap<>();
+                                    Map<String, SalaryComponent> deductionsMap = new HashMap<>();
 
                                     for (FichePaye fiche : ficheList) {
                                         String comp = fiche.getSalary_structure().getName();
@@ -280,19 +309,33 @@ public class SalarySummary {
                                         fiche.getSalary_structure().getEarings().forEach(compo -> {
                                             String label = compo.getSalary_component();
                                             double amount = compo.getAmount();
-                                            componentEarnings.put(label,
-                                                    componentEarnings.getOrDefault(label, 0.0) + amount);
+                                            String formula = compo.getFormula();
+
+                                            SalaryComponent existing = earningsMap.get(label);
+                                            if (existing == null) {
+                                                earningsMap.put(label, new SalaryComponent(label, amount, formula));
+                                            } else {
+                                                existing.setAmount(existing.getAmount() + amount);
+                                            }
                                         });
 
                                         // Deductions
                                         fiche.getSalary_structure().getDeductions().forEach(compo -> {
                                             String label = compo.getSalary_component();
                                             double amount = compo.getAmount();
-                                            componentDeductions.put(label,
-                                                    componentDeductions.getOrDefault(label, 0.0) + amount);
+                                            String formula = compo.getFormula();
+
+                                            SalaryComponent existing = deductionsMap.get(label);
+                                            if (existing == null) {
+                                                deductionsMap.put(label, new SalaryComponent(label, amount, formula));
+                                            } else {
+                                                existing.setAmount(existing.getAmount() + amount);
+                                            }
                                         });
                                     }
 
+                                    List<SalaryComponent> componentEarnings = new ArrayList<>(earningsMap.values());
+                                    List<SalaryComponent> componentDeductions = new ArrayList<>(deductionsMap.values());
                                     summary.setComponentTotals(totals);
                                     summary.setTotalPayNet(totalNet);
                                     summary.setTotalPayBrut(totalBrut);
@@ -357,11 +400,11 @@ public class SalarySummary {
         return Integer.parseInt(summary.getMonth().substring(summary.getMonth().length() - 2)) - 1;
     }
 
-    private void populateComponentMap(Map<String, Double> components, Map<String, double[]> componentMap, int monthIndex) {
+    private void populateComponentMap(List<SalaryComponent> components, Map<String, double[]> componentMap, int monthIndex) {
         if (components != null) {
-            for (Map.Entry<String, Double> entry : components.entrySet()) {
-                componentMap.putIfAbsent(entry.getKey(), new double[12]);
-                componentMap.get(entry.getKey())[monthIndex] += entry.getValue();
+            for (SalaryComponent entry : components) {
+                componentMap.putIfAbsent(entry.getSalary_component(), new double[12]);
+                componentMap.get(entry.getSalary_component())[monthIndex] += entry.getAmount();
             }
         }
     }

@@ -21,6 +21,13 @@ public class SalaryComponent {
     String company;
     double amount;
 
+    public SalaryComponent() {}
+    public SalaryComponent(String salary_component, double amount, String formula) {
+        this.salary_component = salary_component;
+        this.formula = formula;
+        this.amount = amount;
+    }
+
     public String getName() {
         return name;
     }

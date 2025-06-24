@@ -129,4 +129,65 @@ public class SalaryStructure {
 
         return results;
     }
+
+    public SalaryStructure getStructure(HttpEntity<String> entity, String baseurl, String idStructure) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = baseurl + "/api/resource/Salary Structure/"+ idStructure;
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode data = mapper.readTree(response.getBody()).get("data");
+        SalaryStructure salaryStructure = new SalaryStructure();
+        if (!data.isEmpty()) {
+            salaryStructure.setName(data.get("name").asText());
+            salaryStructure.setCompany(data.get("company").asText());
+            salaryStructure.setCurrency(data.get("currency").asText());
+            salaryStructure.setIs_active(data.get("is_active").asText());
+            salaryStructure.setPayroll_frequency(data.get("payroll_frequency").asText());
+            salaryStructure.setTotal_earning(data.get("total_earning").asDouble());
+            salaryStructure.setTotal_deduction(data.get("total_deduction").asDouble());
+
+            List<SalaryComponent> earnings = new ArrayList<>();
+            for (JsonNode earning : data.withArray("earnings")) {
+                SalaryComponent salaryComponent = new SalaryComponent();
+                salaryComponent.setSalary_component(earning.get("salary_component").asText());
+                salaryComponent.setAmount(earning.get("amount").asDouble());
+                salaryComponent.setSalary_component_abbr(earning.get("abbr").asText());
+                salaryComponent.setFormula(earning.get("formula").asText());
+
+                earnings.add(salaryComponent);
+            }
+            salaryStructure.setEarings(earnings);
+
+            List<SalaryComponent> deductions = new ArrayList<>();
+            for (JsonNode deduction : data.withArray("deductions")) {
+                SalaryComponent salaryComponent = new SalaryComponent();
+                salaryComponent.setSalary_component(deduction.get("salary_component").asText());
+                salaryComponent.setAmount(deduction.get("amount").asDouble());
+                salaryComponent.setSalary_component_abbr(deduction.get("abbr").asText());
+                salaryComponent.setFormula(deduction.get("formula").asText());
+
+                deductions.add(salaryComponent);
+            }
+            salaryStructure.setDeductions(deductions);
+
+        }
+
+        return salaryStructure;
+    }
+
+    public String getFormula(String componentName, String componentAbrr) {
+        List<SalaryComponent> earings = this.getEarings();
+        List<SalaryComponent> deductions = this.getDeductions();
+
+        List<SalaryComponent> results = new ArrayList<>();
+        results.addAll(earings);
+        results.addAll(deductions);
+
+        for (SalaryComponent component : results) {
+            if (component.getSalary_component().equalsIgnoreCase(componentName) && component.getSalary_component_abbr().equalsIgnoreCase(componentAbrr)) {
+                return component.getFormula();
+            }
+        }
+        return "";
+    }
 }
