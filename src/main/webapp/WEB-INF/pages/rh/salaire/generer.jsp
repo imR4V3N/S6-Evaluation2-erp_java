@@ -96,6 +96,38 @@
                                                     <label>Montant</label>
                                                     <input class="form-control" type="text" name="montant" value="0"/>
                                                 </div>
+
+                                                <div class="form-group">
+                                                    <label class="d-block">Ecraser</label>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="ecraser" id="exampleRadios1" value="0">
+                                                        <label class="form-check-label" for="exampleRadios1">
+                                                            Oui
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="ecraser" id="exampleRadios1" value="1" checked>
+                                                        <label class="form-check-label" for="exampleRadios2">
+                                                            Non
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="d-block">Moyenne</label>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="moyenne" id="exampleRadios3" value="0">
+                                                        <label class="form-check-label" for="exampleRadios3">
+                                                            Oui
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="moyenne" id="exampleRadios4" value="1" checked>
+                                                        <label class="form-check-label" for="exampleRadios4">
+                                                            Non
+                                                        </label>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <button type="submit" style="width: 15%;" class="btn btn-primary p-2 col-3">Generer</button>

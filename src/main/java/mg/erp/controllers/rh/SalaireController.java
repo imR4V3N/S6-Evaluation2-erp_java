@@ -34,6 +34,7 @@ public class SalaireController {
     private final Employee employee = new Employee();
     private final SalaryService salaryService = new SalaryService();
     private final SalaryComponent salaryComponent = new SalaryComponent();
+    private final SalaryStructureAssignment assignment = new SalaryStructureAssignment();
 
     public SalaireController(ConfigurableEnvironment confixgurableEnvironment) {
         this.configurableEnvironment = confixgurableEnvironment;
@@ -122,7 +123,8 @@ public class SalaireController {
 
     @PostMapping("/generer")
     public String generer(HttpSession session, HttpServletRequest request, RedirectAttributes redirectAttributes,
-                          @RequestParam("employee") String nameEmp, @RequestParam("debut") YearMonth debut, @RequestParam("fin") YearMonth fin, @RequestParam("montant") double montant) {
+                          @RequestParam("employee") String nameEmp, @RequestParam("debut") YearMonth debut, @RequestParam("fin") YearMonth fin, @RequestParam("montant") double montant,
+                          @RequestParam("ecraser") String ecraser, @RequestParam("moyenne") String moyenne) {
         Auth user = (Auth) session.getAttribute("user");
 
         if (user.getSid() == null) {
@@ -132,6 +134,7 @@ public class SalaireController {
         String baseUrl = new Config().getErpUrl(configurableEnvironment);
 
         String url = baseUrl + "/api/resource/Salary Slip?filters=[[\"docstatus\",\"!=\",\"2\"]]&fields=[\"*\"]&limit_page_length=2000000";
+        String assUrl = baseUrl + "/api/resource/Salary Structure Assignment?filters=[[\"docstatus\",\"!=\",\"2\"]]&fields=[\"*\"]&limit_page_length=2000000";
         String empUrl = baseUrl + "/api/resource/Employee?fields=[\"*\"]&limit_page_length=2000000";
 
         HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
@@ -148,26 +151,46 @@ public class SalaireController {
             List<FichePaye> fichePayes = fichePaye.getFiches(response.getBody(), baseUrl, entity);
             Map<YearMonth, List<SalarySummary>> parEmploye = salarySummary.regrouperFichesParMoisEtParEmploye2(fichePayes);
             SalarySummary dernier = salaryService.getDernierSalarySummaryAvant(parEmploye, nameEmp, debut);
-            List<YearMonth> moisGenerer = salaryService.genererMoisManquantsPourEmploye(debut, fin, nameEmp, parEmploye);
+            List<YearMonth> moisGenerer = new ArrayList<>();
+            List<FichePaye> salaireEcraser = new ArrayList<>();
+
+            // Ecraser 0 = Oui ------- 1 = Non
+            if (ecraser.equalsIgnoreCase("1")) {
+                moisGenerer = salaryService.genererMoisManquantsPourEmploye(debut, fin, nameEmp, parEmploye);
+            } else {
+                moisGenerer = salaryService.genererMois(debut, fin);
+                salaireEcraser = fichePaye.getByDateAndEmp(nameEmp, fichePayes, moisGenerer);
+                salaryService.annulerSalaire(salaireEcraser, session, configurableEnvironment);
+            }
             String salaryStructureName = "";
             if (fichePayes != null && fichePayes.size() > 0) {
                 salaryStructureName = fichePayes.get(0).getSalary_structure().getName();
             }
 
+            List<SalaryStructureAssignment> salaryStructureAssignments = assignment.getSalaryStructureAssignments(entity, assUrl);
+            double sommeMoyenne = assignment.moyenne(salaryStructureAssignments);
+
             double value = 0.0;
-            if (montant == 0) {
-                if (dernier != null) {
-                    Double dernierSalaireBase = salaryService.getDernierSalaireBaseAvant(dernier);
-                    if (dernierSalaireBase != null) {
-                        value = dernierSalaireBase;
+//          Moyenne 0 = Oui ------- 1 = Non
+            if (moyenne.equalsIgnoreCase("0")) {
+                value = sommeMoyenne;
+                System.out.println("VALUE : " + sommeMoyenne);
+            } else{
+//              Montant == 0 = Dernier salaire de base ---------- =! 0 = Montant
+                if (montant == 0) {
+                    if (dernier != null) {
+                        Double dernierSalaireBase = salaryService.getDernierSalaireBaseAvant(dernier);
+                        if (dernierSalaireBase != null) {
+                            value = dernierSalaireBase;
+                        } else {
+                            throw new Exception("Aucun salaire de base trouvé pour l'employé " + nameEmp + " avant le mois " + debut);
+                        }
                     } else {
-                        throw new Exception("Aucun salaire de base trouvé pour l'employé " + nameEmp + " avant le mois " + debut);
+                        throw new Exception("Aucun salaire trouvé pour l'employé " + nameEmp + " avant le mois " + debut);
                     }
                 } else {
-                    throw new Exception("Aucun salaire trouvé pour l'employé " + nameEmp + " avant le mois " + debut);
+                    value = montant;
                 }
-            } else {
-                value = montant;
             }
 
 
@@ -219,5 +242,39 @@ public class SalaireController {
         return "redirect:/salaire/modif";
     }
 
+    @GetMapping("/element")
+    public String element(HttpSession session, HttpServletRequest request,
+                          @RequestParam("element") String element, @RequestParam("comparaison") String comparaison, @RequestParam("montant") double montant) {
+        Auth user = (Auth) session.getAttribute("user");
+
+        if (user.getSid() == null) {
+            return "redirect:/";
+        }
+
+        String url = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Salary Component?fields=[\"*\"]&limit_page_length=2000000";
+        String urlSlip = new Config().getErpUrl(configurableEnvironment) + "/api/resource/Salary Slip?filters=[[\"docstatus\",\"!=\",\"2\"]]&fields=[\"*\"]&limit_page_length=2000000";
+        HttpEntity<String> entity = buildHttpEntityWithSid(user.getSid());
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.exchange(urlSlip, HttpMethod.GET, entity, String.class);
+
+            List<SalaryComponent> salaryComponents = salaryComponent.getSalaryComponents(entity, url);
+            List<FichePaye> fichePayes = fichePaye.getFiches(response.getBody(), new Config().getErpUrl(configurableEnvironment), entity);
+            Map<YearMonth, List<SalarySummary>> parEmploye = salarySummary.regrouperFichesParMoisEtParEmploye2(fichePayes);
+            List<SalarySummary> summaries = parEmploye.get(YearMonth.now());
+            if (!element.equalsIgnoreCase("null") && !comparaison.equalsIgnoreCase("null") && montant != -1) {
+                summaries = salaryService.getSalarySummaryCondition2(parEmploye, element, comparaison, montant);
+            }
+
+            request.setAttribute("elements", salaryComponents);
+            request.setAttribute("summaries", summaries);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/";
+        }
+
+        return "rh/employee/salaireParElement";
+    }
 
 }

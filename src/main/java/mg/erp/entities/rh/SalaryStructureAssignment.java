@@ -117,4 +117,16 @@ public class SalaryStructureAssignment {
 
         return results;
     }
+
+    public double moyenne(List<SalaryStructureAssignment> assignments) {
+        double somme = 0.0;
+
+        int ndTotal = 0;
+        for (SalaryStructureAssignment ss : assignments) {
+            somme = somme + ss.getBase();
+            ndTotal++;
+        }
+
+        return somme/ndTotal;
+    }
 }
