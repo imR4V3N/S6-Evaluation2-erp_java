@@ -556,4 +556,21 @@ public class FichePaye {
 //        System.out.println("✅ Tous les salary slips ont été générés avec succès.");
 //    }
 
+
+    public List<FichePaye> getByDateAndEmp(String nameEmp, List<FichePaye> fichePayes, List<YearMonth> mois) {
+        List<FichePaye> result = new ArrayList<>();
+        for (FichePaye fichePaye : fichePayes) {
+            for (YearMonth date : mois) {
+                LocalDate endOfMonth = date.atEndOfMonth();
+                if (fichePaye.getEmployee().equalsIgnoreCase(nameEmp) &&
+                        fichePaye.getStart_date().equalsIgnoreCase(date +"-01") &&
+                        fichePaye.getEnd_date().equalsIgnoreCase(endOfMonth.toString())) {
+
+                    result.add(fichePaye);
+                }
+            }
+        }
+
+        return result;
+    }
 }

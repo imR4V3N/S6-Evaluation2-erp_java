@@ -31,6 +31,7 @@
                 <ul class="dropdown-menu">
                     <li><a class="nav-link" href="<%=contextPath%>/employee">Listes</a></li>
                     <li><a class="nav-link" href="<%=contextPath%>/employee/fiche?mois=<%=YearMonth.now()%>">Fiche de paie</a></li>
+                    <li><a class="nav-link" href="<%=contextPath%>/salaire/element?element=null&comparaison=null&montant=-1">Salaire par elemment</a></li>
                 </ul>
             </li>
             <li class="dropdown">

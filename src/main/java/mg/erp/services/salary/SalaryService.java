@@ -10,6 +10,7 @@ import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import mg.erp.entities.Auth;
 import mg.erp.entities.rh.Employee;
+import mg.erp.entities.rh.FichePaye;
 import mg.erp.entities.rh.SalaryComponent;
 import mg.erp.entities.rh.SalarySummary;
 import mg.erp.utils.Config;
@@ -80,6 +81,18 @@ public class SalaryService {
         return moisManquants;
     }
 
+    public List<YearMonth> genererMois(YearMonth debut, YearMonth fin) {
+        List<YearMonth> moisManquants = new ArrayList<>();
+        YearMonth courant = debut;
+
+        while (!courant.isAfter(fin)) {
+            moisManquants.add(courant);
+            courant = courant.plusMonths(1);
+        }
+
+        return moisManquants;
+    }
+
     // SAVE Salary -------------------------------------------------------------------------------
 
     public ObjectNode createSalaryStructureAssignmentJson(Employee emp, String salaryStructure, YearMonth date, double baseSalary) throws JsonProcessingException {
@@ -110,10 +123,10 @@ public class SalaryService {
         node.put("payroll_frequency", "Monthly");
         node.put("salary_structure", salaryStructure);
         node.put("start_date", date + "-01");
-        node.put("from_date", date + "-01");
+        node.put("posting_date", date + "-01");
         LocalDate endOfMonth = date.atEndOfMonth();
         node.put("end_date", endOfMonth.toString());
-        node.put("docstatus", 0); // 0 pour brouillon, 1 pour soumis
+        node.put("docstatus", 1); // 0 pour brouillon, 1 pour soumis
 
 //        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
         return node;
@@ -176,7 +189,89 @@ public class SalaryService {
         return this.save(sid, baseUrl, assJson, slipJson);
     }
 
-//    UPDATE Salary *---------------------------------------------------------------------------------------
+    public String annulerSalaire(List<FichePaye> summaries, HttpSession session, ConfigurableEnvironment configEnv) throws Exception {
+        Auth user = (Auth) session.getAttribute("user");
+        if (user.getSid() == null) return "redirect:/";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Cookie", "sid=" + user.getSid());
+
+        String erpUrl = new Config().getErpUrl(configEnv);
+
+        for (FichePaye summary : summaries) {
+            String slipName = summary.getName();
+
+            // 1. Récupérer le Salary Slip
+            ResponseEntity<JsonNode> slipResp = restTemplate.exchange(
+                    erpUrl + "/api/resource/Salary Slip/" + slipName,
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    JsonNode.class
+            );
+
+            JsonNode slipData = slipResp.getBody().path("data");
+            String employee = slipData.path("employee").asText();
+            String salaryStructure = slipData.path("salary_structure").asText();
+            String startDate = slipData.path("start_date").asText();
+            int docstatus = slipData.path("docstatus").asInt();
+
+            // 2. Trouver le Salary Structure Assignment correspondant
+            ResponseEntity<JsonNode> assResp = restTemplate.exchange(
+                    erpUrl + "/api/resource/Salary Structure Assignment?fields=[\"name\", \"from_date\"]&filters=[[\"employee\",\"=\",\"" + employee + "\"],[\"salary_structure\",\"=\",\"" + salaryStructure + "\"],[\"docstatus\",\"!=\",2]]",
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    JsonNode.class
+            );
+            JsonNode assList = assResp.getBody().path("data");
+            JsonNode correctAssignment = null;
+            for (JsonNode a : assList) {
+                if (startDate.equals(a.path("from_date").asText())) {
+                    correctAssignment = a;
+                    break;
+                }
+            }
+            if (correctAssignment == null)
+                throw new Exception("Aucun Salary Structure Assignment trouvé pour " + slipName);
+
+            String assignmentName = correctAssignment.path("name").asText();
+
+            // 3. Annuler ou supprimer l'ancien Salary Slip
+            if (docstatus == 1) {
+                // Annuler si soumis
+                restTemplate.exchange(
+                        erpUrl + "/api/resource/Salary Slip/" + slipName,
+                        HttpMethod.PUT,
+                        new HttpEntity<>(Map.of("docstatus", 2), headers),
+                        String.class
+                );
+            } else if (docstatus == 0) {
+                // Supprimer si draft
+                restTemplate.exchange(
+                        erpUrl + "/api/resource/Salary Slip/" + slipName,
+                        HttpMethod.DELETE,
+                        new HttpEntity<>(headers),
+                        String.class
+                );
+            }
+
+            // 4. Annuler l'ancien Assignment
+            restTemplate.exchange(
+                    erpUrl + "/api/resource/Salary Structure Assignment/" + assignmentName,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(Map.of("docstatus", 2), headers),
+                    String.class
+            );
+        }
+
+        System.out.println("Annulation des salaires terminée avec succès.");
+
+        return "Annulation des salaires terminée avec succès.";
+    }
+
+
+    //    UPDATE Salary *---------------------------------------------------------------------------------------
     public List<SalaryComponent> mergeComponent(List<SalaryComponent> componentEarnings, List<SalaryComponent> componentDeductions) {
         List<SalaryComponent> allComponents = new ArrayList<>();
         allComponents.addAll(componentEarnings);
@@ -265,6 +360,43 @@ public class SalaryService {
                     if (comparaison.equalsIgnoreCase(">")){
                         if (value >= montant) {
                             summary = this.setSalaireBase(summary, addition, pourcentage);
+                            results.add(summary);
+                        }
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+    public List<SalarySummary> getSalarySummaryCondition2(Map<YearMonth, List<SalarySummary>> parEmploye,
+                                                         String element, String comparaison, double montant) {
+        List<SalarySummary> results = new ArrayList<>();
+
+        for (Map.Entry<YearMonth, List<SalarySummary>> entry : parEmploye.entrySet()) {
+            for (SalarySummary summary : entry.getValue()) {
+                List<SalaryComponent> allComponents = this.mergeComponent(summary.getComponentEarnings(), summary.getComponentDeductions());
+                Double value = this.getOrDefault(allComponents,element);
+
+                if (value != null) {
+                    if (comparaison.equalsIgnoreCase("<")){
+                        if (value < montant) {
+                            results.add(summary);
+                        }
+                    }
+                    if (comparaison.equalsIgnoreCase(">")){
+                        if (value > montant) {
+                            results.add(summary);
+                        }
+                    }
+                    if (comparaison.equalsIgnoreCase("<=")){
+                        if (value <= montant) {
+                            results.add(summary);
+                        }
+                    }
+                    if (comparaison.equalsIgnoreCase(">=")){
+                        if (value >= montant) {
                             results.add(summary);
                         }
                     }
